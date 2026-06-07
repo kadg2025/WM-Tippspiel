@@ -26,8 +26,9 @@
     font-family:"Anton",sans-serif;font-size:22px;letter-spacing:1px;display:flex;align-items:center;justify-content:center}
   .htext .title{font-family:"Anton",sans-serif;font-size:26px;line-height:1;letter-spacing:.5px}
   .htext .sub{font-size:12.5px;opacity:.85;margin-top:4px;font-weight:500}
-  nav{display:flex;gap:2px;max-width:680px;margin:0 auto}
-  nav button{flex:1;background:none;border:0;color:rgba(255,255,255,.7);font:inherit;font-weight:700;font-size:13.5px;padding:12px 2px;cursor:pointer;border-bottom:3px solid transparent}
+  nav{display:flex;gap:2px;max-width:680px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{flex:1 0 auto;white-space:nowrap;background:none;border:0;color:rgba(255,255,255,.7);font:inherit;font-weight:700;font-size:13.5px;padding:12px 14px;cursor:pointer;border-bottom:3px solid transparent}
   nav button.on{color:#fff;border-bottom-color:var(--gold)}
   main{max-width:680px;margin:0 auto;padding:16px 16px 70px}
   /* Identity */
@@ -123,6 +124,18 @@
   .prize .pwin{color:var(--mut);font-size:14px;font-weight:600;margin-top:2px}
   .prize .pcount{font-size:20px;letter-spacing:2px}
   .prize.gold{border-color:var(--gold);box-shadow:0 8px 26px rgba(244,180,0,.2)}
+  /* Rules */
+  .rcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .rcard h3{margin:0 0 4px;font-size:17px;font-family:"Anton",sans-serif;letter-spacing:.3px}
+  .rcard .lead{color:var(--mut);font-size:13px;margin-bottom:12px;line-height:1.5}
+  .rrow{display:flex;align-items:flex-start;gap:10px;padding:7px 0;font-size:14px;line-height:1.45;border-bottom:1px dashed var(--line)}
+  .rrow:last-child{border-bottom:0}
+  .rrow .pp{flex:0 0 auto;min-width:54px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+  .rrow.ko .pp{color:#b8860b}
+  .rmax{margin-top:8px;font-size:13px;font-weight:700;background:var(--bg);border-radius:8px;padding:8px 10px}
+  .fineprint{font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .fineprint li{margin-bottom:8px}
+  .fineprint b{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -136,7 +149,10 @@
   const ADMIN_PW     = "WM2026";              // admin password
   const TEAM_TITEL   = "OPSD World Cup Pool"; // shown in the header
   const LOGO_URL     = "";                    // e.g. "logo.png" once you add it to the repo
-  const PUNKTE       = { exact:5, diff:3, tendency:2 }; // match scoring
+  const SCORE        = {                       // additive scoring (points add up)
+    group:    { tendency:5,  home:1, away:1, diff:3 },
+    knockout: { tendency:10, home:2, away:2, diff:6 }
+  };
 </script>
 <!-- ============================================================ -->
 
@@ -153,6 +169,7 @@
     <button data-tab="bonus">Bonus</button>
     <button data-tab="rank">Leaderboard</button>
     <button data-tab="prizes">Prizes</button>
+    <button data-tab="rules">Rules</button>
     <button data-tab="admin">Admin</button>
   </nav>
 </header>
@@ -220,14 +237,24 @@ async function loadAll(){
   renderMe(); renderView();
 }
 
-/* ---------- Match scoring ---------- */
+/* ---------- Match scoring (additive) ---------- */
 function scoreOf(pick,m){
   if(!pick||!m||!m.finished||m.home_score==null||m.away_score==null) return null;
   const ph=+pick.home_tip,pa=+pick.away_tip,rh=+m.home_score,ra=+m.away_score;
-  if(ph===rh&&pa===ra) return PUNKTE.exact;
-  if(ph-pa===rh-ra) return PUNKTE.diff;
-  if(Math.sign(ph-pa)===Math.sign(rh-ra)) return PUNKTE.tendency;
-  return 0;
+  const S=(m.phase==="Group")?SCORE.group:SCORE.knockout;
+  let pts=0;
+  if(Math.sign(ph-pa)===Math.sign(rh-ra)) pts+=S.tendency; // correct outcome (incl. draw)
+  if(ph===rh) pts+=S.home;                                 // exact home goals
+  if(pa===ra) pts+=S.away;                                 // exact away goals
+  if(ph-pa===rh-ra) pts+=S.diff;                           // correct goal difference
+  return pts;
+}
+function isExactHit(pick,m){ return pick&&m&&m.finished&&+pick.home_tip===+m.home_score&&+pick.away_tip===+m.away_score; }
+function maxPts(m){ const S=(m.phase==="Group")?SCORE.group:SCORE.knockout; return S.tendency+S.home+S.away+S.diff; }
+function isClosed(m){
+  if(m.finished||m.locked) return true;
+  if(m.kickoff){ const k=new Date(m.kickoff).getTime(); if(!isNaN(k)&&Date.now()>=k-5*60*1000) return true; }
+  return false;
 }
 function myPick(id){ return tips.find(x=>x.player===me&&x.match_id===id); }
 
@@ -253,7 +280,7 @@ function totals(){
   bonusAnswers.forEach(a=>players.add(a.player));
   return [...players].map(name=>{
     let pts=0,exact=0,bonus=0;
-    tips.filter(t=>t.player===name).forEach(t=>{const m=matches.find(x=>x.id===t.match_id);const s=scoreOf(t,m);if(s!=null){pts+=s;if(s===PUNKTE.exact)exact++;}});
+    tips.filter(t=>t.player===name).forEach(t=>{const m=matches.find(x=>x.id===t.match_id);const s=scoreOf(t,m);if(s!=null){pts+=s;if(isExactHit(t,m))exact++;}});
     bonusQs.forEach(q=>{const e=bonusEarned(q,name);if(e){pts+=e;bonus+=e;}});
     return {name,pts,exact,bonus};
   }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name));
@@ -277,7 +304,8 @@ function renderMe(){
 /* ---------- Matches ---------- */
 function matchCard(m){
   const pick=myPick(m.id)||{};
-  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span>${esc(m.match_date)} · ${esc(m.match_time)}${m.locked&&!m.finished?" · 🔒 closed":""}</span></div>`;
+  const closed=isClosed(m);
+  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span>${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🔒 closed":""}</span></div>`;
   if(m.finished){
     const s=scoreOf(pick,m);const has=pick.home_tip!=null;
     return `<div class="match">${head}
@@ -289,7 +317,7 @@ function matchCard(m){
       <div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>
         ${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div></div>`;
   }
-  const dis=m.locked?"disabled":"";
+  const dis=closed?"disabled":"";
   return `<div class="match" data-m="${m.id}">${head}
     <div class="teams">
       <div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div>
@@ -302,12 +330,12 @@ function renderTip(){
   if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
   let html="",last="";
   matches.forEach(m=>{if(m.match_date!==last){html+=`<div class="day">${esc(m.match_date)}</div>`;last=m.match_date;}html+=matchCard(m);});
-  if(matches.some(m=>!m.finished&&!m.locked)) html+=`<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`;
+  if(matches.some(m=>!isClosed(m))) html+=`<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`;
   return html;
 }
 async function saveTips(){
   const rows=[];
-  document.querySelectorAll('.match[data-m]').forEach(c=>{const id=+c.dataset.m;const h=c.querySelector('[data-side=h]').value,a=c.querySelector('[data-side=a]').value;if(h!==""&&a!=="")rows.push({player:me,match_id:id,home_tip:+h,away_tip:+a});});
+  document.querySelectorAll('.match[data-m]').forEach(c=>{const id=+c.dataset.m;const m=matches.find(x=>x.id===id);if(m&&isClosed(m))return;const h=c.querySelector('[data-side=h]').value,a=c.querySelector('[data-side=a]').value;if(h!==""&&a!=="")rows.push({player:me,match_id:id,home_tip:+h,away_tip:+a});});
   if(!rows.length){toast("Nothing to save yet");return;}
   const {error}=await sb.from("tips").upsert(rows,{onConflict:"player,match_id"});
   if(error){toast("Save failed");return;}
@@ -368,6 +396,66 @@ function renderRank(){
     return `<tr class="${p.name===me?"me-row":""}"><td class="rank ${c}">${r}</td><td>${esc(p.name)}${p.name===me?" <span style='color:var(--accent);font-size:12px'>(you)</span>":""}</td><td class="r num">${p.exact}</td><td class="r"><span class="ptsbig num">${p.pts}</span></td></tr>`;}).join("");
   return `${podium}${any?"":`<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>`}
     <table><thead><tr><th>#</th><th>Player</th><th class="r" title="exact scores">🎯</th><th class="r">Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ---------- Rules ---------- */
+function renderRules(){
+  const g=SCORE.group,k=SCORE.knockout;
+  return `
+  <div class="rcard">
+    <h3>How to play 🎮</h3>
+    <div class="lead">Predict the score of every match. Climb the leaderboard. Win chocolate. That's the whole sport.</div>
+    <div class="rrow"><span class="pp">⏱️</span><span>Place or change a pick until <b>5 minutes before kickoff</b>. After that it's locked — no take-backs, no "I meant to change it", no mercy.</span></div>
+    <div class="rrow"><span class="pp">🥅</span><span>For knockout games, predict the score <b>after 120 minutes</b> (extra time counts, penalty-shootout goals do <b>not</b>). A 1:1 thriller that goes to penalties is scored as 1:1.</span></div>
+    <div class="rrow"><span class="pp">🧑</span><span>Enter your name to play — and spell it the same way every time. "Beat", "beat" and "BEAT the Legend" are three different humans to the leaderboard.</span></div>
+  </div>
+
+  <div class="rcard">
+    <h3>Points · Group stage</h3>
+    <div class="lead">Points add up — a perfect call stacks all four.</div>
+    <div class="rrow"><span class="pp">${g.tendency} pts</span><span>Correct outcome — home win, draw or away win (regardless of goals).</span></div>
+    <div class="rrow"><span class="pp">${g.home} pt</span><span>Exact number of <b>home</b> goals.</span></div>
+    <div class="rrow"><span class="pp">${g.away} pt</span><span>Exact number of <b>away</b> goals.</span></div>
+    <div class="rrow"><span class="pp">${g.diff} pts</span><span>Correct goal difference (with the right winner).</span></div>
+    <div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Group"})} points.</div>
+  </div>
+
+  <div class="rcard">
+    <h3>Points · Knockout stage</h3>
+    <div class="lead">Same idea, double the drama — everything's worth more.</div>
+    <div class="rrow ko"><span class="pp">${k.tendency} pts</span><span>Correct outcome (after 120').</span></div>
+    <div class="rrow ko"><span class="pp">${k.home} pts</span><span>Exact number of <b>home</b> goals.</span></div>
+    <div class="rrow ko"><span class="pp">${k.away} pts</span><span>Exact number of <b>away</b> goals.</span></div>
+    <div class="rrow ko"><span class="pp">${k.diff} pts</span><span>Correct goal difference (with the right winner).</span></div>
+    <div class="rmax">🎯 Exact score = ${maxPts({phase:"Final"})} points.</div>
+  </div>
+
+  <div class="rcard">
+    <h3>Bonus questions 🎲</h3>
+    <div class="rrow"><span class="pp">50 pts</span><span>Correctly calling the <b>World Champion</b>. The big one — choose wisely.</span></div>
+    <div class="rrow"><span class="pp">20 pts</span><span>Each other bonus question you get right.</span></div>
+    <div class="rrow"><span class="pp">📐</span><span>For "how many…" questions, the <b>closest</b> guess takes the points. Optimists and realists both welcome.</span></div>
+  </div>
+
+  <div class="rcard">
+    <h3>Fair play 🤝</h3>
+    <div class="rrow"><span class="pp">0️⃣</span><span>Everyone starts at <b>0 points</b> when they join — even if matches have already been played. No time machines, no head starts.</span></div>
+    <div class="rrow"><span class="pp">⚖️</span><span>The admin enters the official results and is <b>always right</b>. (The admin is also probably mid-table. Be gentle.)</span></div>
+  </div>
+
+  <div class="rcard">
+    <h3>Terms &amp; Conditions 📜</h3>
+    <div class="lead">The fun print. By joining the OPSD World Cup Pool, you agree to the following highly binding nonsense:</div>
+    <ul class="fineprint">
+      <li><b>Who can play:</b> all OPSD members, honorary members, the colleague who only lurks in the channel, and any "productive developer" (productivity not actually verified).</li>
+      <li><b>Code of conduct:</b> trash-talk responsibly, lose with dignity (or at least a creative excuse), and never — <i>never</i> — blame the VAR.</li>
+      <li><b>Prizes:</b> SWISS Schoki. Non-refundable, non-negotiable, best enjoyed at 30,000 ft — sea level also acceptable. 🍫</li>
+      <li><b>Bribery:</b> bribing the admin with chocolate is officially encouraged and officially ineffective.</li>
+      <li><b>Privacy:</b> your name and picks are visible to everyone in the pool. That's the point. Don't predict anything you wouldn't want on the office fridge.</li>
+      <li><b>Disputes:</b> settled by the admin, a coin flip, or rock-paper-scissors — admin's choice, admin's mood.</li>
+      <li><b>The only rule that matters:</b> have fun. May the best guesser win. 🏆</li>
+    </ul>
+  </div>`;
 }
 
 /* ---------- Prizes ---------- */
@@ -437,15 +525,16 @@ function renderAdmin(){
 
     <div class="panel"><h3>Bonus questions</h3>${bqlist||'<div class="hint">No bonus questions yet.</div>'}</div>
 
-    <div class="panel"><h3>Scoring</h3><div class="rules">
-      Matches: <b>${PUNKTE.exact}</b> exact · <b>${PUNKTE.diff}</b> goal difference · <b>${PUNKTE.tendency}</b> tendency · 0 wrong.<br>
-      Bonus: points set per question. „Number" questions reward whoever is <b>closest</b>.</div></div>`;
+    <div class="panel"><h3>Scoring (summary)</h3><div class="rules">
+      Group stage (points add up): <b>${SCORE.group.tendency}</b> outcome · <b>${SCORE.group.home}</b> home goals · <b>${SCORE.group.away}</b> away goals · <b>${SCORE.group.diff}</b> goal diff (max ${maxPts({phase:"Group"})}).<br>
+      Knockout: <b>${SCORE.knockout.tendency}</b> / <b>${SCORE.knockout.home}</b> / <b>${SCORE.knockout.away}</b> / <b>${SCORE.knockout.diff}</b> (max ${maxPts({phase:"Final"})}).<br>
+      Full rules are on the <b>Rules</b> tab.</div></div>`;
 }
 
 /* ---------- Router ---------- */
 function renderView(){
   const v=$("#view");
-  v.innerHTML = tab==="tip"?renderTip() : tab==="bonus"?renderBonus() : tab==="rank"?renderRank() : tab==="prizes"?renderPrizes() : renderAdmin();
+  v.innerHTML = tab==="tip"?renderTip() : tab==="bonus"?renderBonus() : tab==="rank"?renderRank() : tab==="prizes"?renderPrizes() : tab==="rules"?renderRules() : renderAdmin();
   bind();
 }
 function bind(){
