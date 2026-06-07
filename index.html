@@ -120,6 +120,8 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transition:.25s;pointer-events:none;z-index:99}
   .toast.show{opacity:1;bottom:30px}
   .hint{font-size:12px;color:var(--mut);margin:4px 4px 14px;line-height:1.5}
+  .opsline{background:linear-gradient(135deg,#fffdf5,#f7f3e8);border:1px solid #eee2bd;border-radius:12px;padding:11px 14px;margin:0 0 12px;box-shadow:var(--shadow);font-size:13.5px;font-weight:700;color:#6a4b00;line-height:1.45}
+  .opsline .label{display:inline-block;margin-right:8px;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#8a6a10}
   .loading{text-align:center;padding:50px;color:var(--mut)}
 
   .round-nav{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
@@ -233,6 +235,40 @@ const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setT
 const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 const PRIZE_IMG="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...";
 let matches=[],tips=[],bonusQs=[],bonusAnswers=[],tab="tip",adminOK=false,tipRound="Round 1",_lastRank1=null;
+let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
+const OPS_PRESETS=[
+  "Boarding call: today's biggest fixtures are open for predictions.",
+  "Final boarding reminder: predictions close 5 minutes before kickoff.",
+  "Flight Deck update: every scored match can reshuffle the leaderboard.",
+  "Prize cargo check: SWISS Schoki is waiting for the top 3.",
+  "Control Tower note: one sharp prediction can change everything."
+];
+const OPS_TEAM_MESSAGES={
+  "Germany":"Viel Glück, Deutschland!",
+  "Deutschland":"Viel Glück, Deutschland!",
+  "Switzerland":"Hopp Schwiiz!",
+  "Schweiz":"Hopp Schwiiz!",
+  "Poland":"Powodzenia, Polsko!",
+  "Polen":"Powodzenia, Polsko!",
+  "France":"Bonne chance, la France !",
+  "Frankreich":"Bonne chance, la France !",
+  "Portugal":"Boa sorte, Portugal!",
+  "Netherlands":"Succes, Nederland!",
+  "Niederlande":"Succes, Nederland!",
+  "Argentina":"¡Mucha suerte, Argentina!",
+  "Argentinien":"¡Mucha suerte, Argentina!",
+  "Turkey":"İyi şanslar, Türkiye!",
+  "Türkei":"İyi şanslar, Türkiye!",
+  "Türkiye":"İyi şanslar, Türkiye!",
+  "Austria":"Viel Glück, Österreich!",
+  "Österreich":"Viel Glück, Österreich!",
+  "Japan":"頑張れ、日本！",
+  "Spain":"¡Mucha suerte, España!",
+  "Spanien":"¡Mucha suerte, España!",
+  "Iran":"موفق باشی، ایران!",
+  "Croatia":"Sretno, Hrvatska!",
+  "Kroatien":"Sretno, Hrvatska!"
+};
 
 let me="";
 try{ me=localStorage.getItem("wm_me")||""; }catch(e){ me=""; }
@@ -252,6 +288,11 @@ async function loadAll(){
   matches=m.data||[]; tips=t.data||[];
   bonusQs=(bq&&!bq.error)?bq.data:[];
   bonusAnswers=(ba&&!ba.error)?ba.data:[];
+  try{
+    opsNewsMode=localStorage.getItem("ops_news_mode")||"auto";
+    opsNewsPreset=localStorage.getItem("ops_news_preset")||"";
+    opsNewsCustom=localStorage.getItem("ops_news_custom")||"";
+  }catch(e){}
   renderMe(); renderView();
 }
 
@@ -298,6 +339,51 @@ function bonusEarned(q,player){
     return (myd===best&&best!==Infinity)?q.points:0;
   }
   return (String(a.answer).trim().toLowerCase()===String(q.correct).trim().toLowerCase())?q.points:0;
+}
+
+function todayKey(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function matchDateKey(m){
+  if(m && m.kickoff){
+    const d=new Date(m.kickoff);
+    if(!isNaN(d)) return todayKey(d);
+  }
+  return null;
+}
+function todaysMatches(){
+  const key=todayKey();
+  return matches.filter(m=>matchDateKey(m)===key);
+}
+function autoOpsNews(){
+  const today=totays=todaysMatches();
+  for(const m of today){
+    const msg=OPS_TEAM_MESSAGES[m.home]||OPS_TEAM_MESSAGES[m.away];
+    if(msg) return msg;
+  }
+  const openToday=today.filter(m=>!isClosed(m));
+  if(openToday.length===1){
+    const m=openToday[0];
+    return `${m.home} vs. ${m.away} tonight — predictions are open.`;
+  }
+  if(openToday.length>1){
+    return `${openToday.length} matches on today's board — don't miss the cutoff.`;
+  }
+  const scored=matches.filter(m=>m.finished).length;
+  if(scored>0) return `Flight Deck live: ${scored} scored match${scored===1?"":"es"} already counted.`;
+  return "Predictions are open — pick your scores before boarding closes.";
+}
+function currentOpsNews(){
+  if(opsNewsMode==="custom" && opsNewsCustom.trim()) return opsNewsCustom.trim();
+  if(opsNewsMode==="preset" && opsNewsPreset.trim()) return opsNewsPreset.trim();
+  return autoOpsNews();
+}
+function renderOpsLine(){
+  const msg=currentOpsNews();
+  return msg?`<div class="opsline"><span class="label">OPS news</span>${esc(msg)}</div>`:"";
 }
 
 function totals(){
@@ -718,6 +804,20 @@ function bind(){
     }
   }
   if(tab==="admin"&&adminOK){
+    const opsBtn=$("#saveOpsNews");
+    if(opsBtn) opsBtn.onclick=()=>{
+      opsNewsMode=$("#opsMode").value;
+      opsNewsPreset=$("#opsPreset").value.trim();
+      opsNewsCustom=$("#opsCustom").value.trim();
+      try{
+        localStorage.setItem("ops_news_mode",opsNewsMode);
+        localStorage.setItem("ops_news_preset",opsNewsPreset);
+        localStorage.setItem("ops_news_custom",opsNewsCustom);
+      }catch(e){}
+      toast("OPS news saved");
+      if(tab==="admin") renderView();
+    };
+
     $("#addMatch").onclick=async()=>{
       const h=$("#nh").value.trim(),a=$("#na").value.trim();
       if(!h||!a){toast("Enter home and away");return;}
