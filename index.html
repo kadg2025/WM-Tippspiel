@@ -359,7 +359,7 @@ function todaysMatches(){
   return matches.filter(m=>matchDateKey(m)===key);
 }
 function autoOpsNews(){
-  const today=totays=todaysMatches();
+const today=todaysMatches();
   for(const m of today){
     const msg=OPS_TEAM_MESSAGES[m.home]||OPS_TEAM_MESSAGES[m.away];
     if(msg) return msg;
@@ -547,7 +547,7 @@ function renderTip(){
   const progress=open.length?`<div class="hint" style="margin-bottom:10px">📝 ${filled.length}/${open.length} picks entered for this round</div>`:"";
   const saveBtn=fallback.some(m=>!isClosed(m))?`<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`:"";
 
-  return (hasRounds?nav:"")+renderNewsBox()+progress+html+saveBtn;
+  return (hasRounds?nav:"")+renderOpsLine()+progress+html+saveBtn;
 }
 
 async function saveTips(){
