@@ -402,7 +402,11 @@ function renderTip(){
 }
 async function saveTips(){
   const rows=[];
-  document.querySelectorAll('.match[data-m]').forEach(c=>{const id=+c.dataset.m;const m=matches.find(x=>x.id===id);if(m&&isClosed(m))return;const h=c.querySelector('[data-side=h]').value,a=c.querySelector('[data-side=a]').value;if(h!==""&&a!=="")rows.push({player:me,match_id:id,home_tip:+h,away_tip:+a});});
+  document.querySelectorAll('.match[data-m]').forEach(c=>{const id=+c.dataset.m;const m=matches.find(x=>x.id===id);if(m&&isClosed(m))return;const h=c.querySelector('[data-side=h]').value,a=c.querySelector('[data-side=a]').value;if(h!=="" && a!==""){
+  const hv = Math.max(0, Math.round(+h));
+  const av = Math.max(0, Math.round(+a));
+  rows.push({player:me,match_id:id,home_tip:hv,away_tip:av});
+});
   if(!rows.length){toast("Nothing to save yet");return;}
   const {error}=await sb.from("tips").upsert(rows,{onConflict:"player,match_id"});
   if(error){toast("Save failed");return;}
