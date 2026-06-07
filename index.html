@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --pitch:#0d4d3a;--pitch-2:#0a3a2c;--ink:#14201b;--mut:#6b7a73;
+    --pitch:#19194B;--pitch-2:#101038;--ink:#141822;--mut:#6b727d;
     --line:#e6eae8;--bg:#f3f6f4;--card:#fff;
-    --gold:#f4b400;--silver:#aab2ad;--bronze:#cd7f32;--green:#16a34a;
-    --accent:#0d4d3a;--accent-d:#0a3a2c;
-    --shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(13,77,58,.08);
+    --gold:#f4b400;--silver:#aab2ad;--bronze:#cd7f32;--green:#2d52c8;
+    --accent:#19194B;--accent-d:#101038;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(16,16,48,.10);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -98,7 +98,7 @@
   table.rank-table td.player{font-size:17px;font-weight:700}
   table.rank-table td.stat{font-size:17px;font-variant-numeric:tabular-nums}
   table.rank-table td.total{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
-  .me-row{background:#f0faf4}
+  .me-row{background:#eef1fb}
   .rank.p1{color:var(--gold)} .rank.p2{color:var(--silver)} .rank.p3{color:var(--bronze)}
   .you-tag{color:var(--accent);font-size:12px;font-weight:800;margin-left:6px;white-space:nowrap}
 
@@ -132,7 +132,7 @@
 
   .all-picks{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-wrap:wrap;gap:5px}
   .pick-chip{font-size:12px;font-weight:700;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--mut);white-space:nowrap}
-  .pick-chip.exact{background:#dcfce7;border-color:#86efac;color:#166534}
+  .pick-chip.exact{background:#e3e9fc;border-color:#aebef0;color:#1b2e7a}
   .pick-chip.good{background:#fef9c3;border-color:#fde047;color:#854d0e}
   .pick-chip.me{border-color:var(--accent);color:var(--accent)}
   .reveal-toggle{font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;margin-top:8px;display:inline-block;border:0;background:none;padding:0}
@@ -168,7 +168,7 @@
   const SUPABASE_URL = "https://dgjfydzjgokzigklgchj.supabase.co";
   const SUPABASE_KEY = "sb_publishable_mRkwbCEvlRcQL8wk3YSJ4g_6ceY3yUz";
   const ADMIN_PW     = "WM2026";
-  const TEAM_TITEL   = "OPSD World Cup Pool";
+  const TEAM_TITEL   = "World Cup Pool";
   const LOGO_URL     = "opsd-logo.png";
   const SCORE        = {
     group:    { tendency:5,  home:1, away:1, diff:3 },
@@ -522,7 +522,7 @@ function renderTip(){
     const open=rm.filter(m=>!isClosed(m));
     const picked=open.filter(m=>{const p=myPick(m.id);return p&&p.home_tip!=null;});
     if(open.length===0) return "#aab2ad";
-    if(picked.length===open.length) return "#16a34a";
+    if(picked.length===open.length) return "#2d52c8";
     if(picked.length>0) return "#f4b400";
     return "#e6eae8";
   }
@@ -630,7 +630,7 @@ async function saveBonus(){
 
 function fireConfetti(){
   if(typeof confetti==="undefined") return;
-  confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#0d4d3a","#ffffff","#16a34a"]});
+  confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]});
   setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300);
   setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500);
 }
