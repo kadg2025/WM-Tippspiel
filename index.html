@@ -418,58 +418,66 @@ function renderTip(){
 }
 
 async function saveTips(){
-  const rows=[];
-  let invalid=false;
+  const rows = [];
+  let missing = false;
+  let invalid = false;
 
-  document.querySelectorAll('.match[data-m]').forEach(c=>{
-    const id=+c.dataset.m;
-    const m=matches.find(x=>x.id===id);
-    if(m&&isClosed(m)) return;
+  [...document.querySelectorAll(".match[data-m]")].forEach(c=>{
+    const id = +c.dataset.m;
+    const m = matches.find(x=>x.id===id);
+    if(!m || isClosed(m)) return;
 
-    const hEl=c.querySelector('[data-side="h"]');
-    const aEl=c.querySelector('[data-side="a"]');
-    if(!hEl || !aEl){ invalid=true; return; }
+    const hEl = c.querySelector('[data-side="h"]');
+    const aEl = c.querySelector('[data-side="a"]');
+    const hRaw = hEl ? hEl.value.trim() : "";
+    const aRaw = aEl ? aEl.value.trim() : "";
 
-    const h=hEl.value.trim();
-    const a=aEl.value.trim();
+    if(hRaw === "" && aRaw === "") return;
 
-    if(h==="" && a==="") return;
-    if(h==="" || a===""){ invalid=true; return; }
+    if(hRaw === "" || aRaw === ""){
+      missing = true;
+      return;
+    }
 
-    const hv=Number(h);
-    const av=Number(a);
+    const h = Number(hRaw);
+    const a = Number(aRaw);
 
-    if(!Number.isFinite(hv) || !Number.isFinite(av) || hv<0 || av<0){
-      invalid=true;
+    if(!Number.isFinite(h) || !Number.isFinite(a) || h < 0 || a < 0){
+      invalid = true;
       return;
     }
 
     rows.push({
       player: me,
       match_id: id,
-      home_tip: Math.round(hv),
-      away_tip: Math.round(av)
+      home_tip: Math.round(h),
+      away_tip: Math.round(a)
     });
   });
 
+  if(missing){
+    toast("Please enter both home and away goals.");
+    return;
+  }
+
   if(invalid){
-    toast("Only whole numbers 0 or higher are allowed");
+    toast("Goals must be 0 or higher.");
     return;
   }
 
   if(!rows.length){
-    toast("Nothing to save yet");
+    toast("Nothing to save yet.");
     return;
   }
 
-  const {error}=await sb.from("tips").upsert(rows,{onConflict:"player,match_id"});
+  const { error } = await sb.from("tips").upsert(rows, { onConflict: "player,match_id" });
   if(error){
-    toast("Save failed");
+    toast("Save failed.");
     return;
   }
 
   await loadAll();
-  toast("Predictions saved ✓");
+  toast("Predictions saved.");
 }
 
 function bonusCard(q){
@@ -522,21 +530,74 @@ function fireConfetti(){
   setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500);
 }
 function renderRank(){
-  const t=totals();
-  if(!t.length) return `<div class="empty">No predictions yet.<br>Be the first — glory (and bragging rights) await. 🏆</div>`;
-  const any=matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved);
-  let podium="";
-  if(t.length>=3){
-    const p=t.slice(0,3),ord=[p[1],p[0],p[2]],cls=["second","first","third"],med=["🥈","🥇","🥉"];
-    podium=`<div class="podium">${ord.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`;
+  const t = totals();
+  if(!t.length){
+    return `<div class="empty">No predictions yet.<br>Be the first — glory and bragging rights await.</div>`;
   }
-  const rows=t.map((p,i)=>{
-    const r=i+1,c=r<=3?"p"+r:"";
-    return `<tr class="${p.name===me?"me-row":""}"><td class="rank ${c}">${r}</td><td>${esc(p.name)}${p.name===me?" <span style='color:var(--accent);font-size:12px'>(you)</span>":""}</td><td class="r num">${p.exact}</td><td class="r"><span class="ptsbig num">${p.pts}</span></td></tr>`;
+
+  const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved);
+
+  let podium = "";
+  if(t.length >= 3){
+    const p = t.slice(0,3);
+    const order = [p[1], p[0], p[2]].filter(Boolean);
+    const cls = ["second","first","third"];
+    const med = ["🥈","🥇","🥉"];
+    podium = `<div class="podium">${
+      order.map((pl,i)=>`
+        <div class="pod ${cls[i]}">
+          <div class="medal">${med[i]}</div>
+          <div class="pname">${esc(pl.name)}</div>
+          <div class="ppts num">${pl.pts} pts</div>
+        </div>
+      `).join("")
+    }</div>`;
+  }
+
+  const rows = t.map((p,i)=>{
+    const r = i + 1;
+    const rankCls = r <= 3 ? `p${r}` : "";
+    return `
+      <tr class="${p.name===me ? "me-row" : ""}">
+        <td class="rank ${rankCls}">${r}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:700">${esc(p.name)}</span>
+            ${p.name===me ? `<span style="color:var(--accent);font-size:12px;font-weight:700">(you)</span>` : ``}
+          </div>
+        </td>
+        <td class="r num">${p.exact}</td>
+        <td class="r num">${p.bonus}</td>
+        <td class="r"><span class="ptsbig num">${p.pts}</span></td>
+      </tr>
+    `;
   }).join("");
-  if(me&&t.length&&t[0].name===me){if(_lastRank1!==me){_lastRank1=me;setTimeout(fireConfetti,200);}}else{_lastRank1=null;}
-  return `${podium}${any?"":`<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>`}
-    <table><thead><tr><th>#</th><th>Player</th><th class="r" title="exact scores">🎯</th><th class="r">Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+  if(me && t.length && t[0].name === me){
+    if(_lastRank1 !== me){
+      _lastRank1 = me;
+      setTimeout(fireConfetti, 200);
+    }
+  } else {
+    _lastRank1 = null;
+  }
+
+  return `
+    ${podium}
+    ${!anyScored ? `<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>` : ``}
+    <table>
+      <thead>
+        <tr>
+          <th style="width:44px">#</th>
+          <th>Player</th>
+          <th class="r" title="Exact score hits">Exact</th>
+          <th class="r" title="Bonus question points">Bonus</th>
+          <th class="r">Total</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 
 function renderRules(){
