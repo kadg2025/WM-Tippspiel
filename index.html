@@ -233,7 +233,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;"
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
 
 const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
-const PRIZE_IMG="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/...";
+const PRIZE_IMG="prize-schoki.jpg";
 let matches=[],tips=[],bonusQs=[],bonusAnswers=[],tab="tip",adminOK=false,tipRound="Round 1",_lastRank1=null;
 let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
 const OPS_PRESETS=[
