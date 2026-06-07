@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPSD · World Cup 2026 Pool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch:#0d4d3a;--pitch-2:#0a3a2c;--ink:#14201b;--mut:#6b7a73;
+    --line:#e6eae8;--bg:#f3f6f4;--card:#fff;
+    --gold:#f4b400;--silver:#aab2ad;--bronze:#cd7f32;--green:#16a34a;
+    --accent:#0d4d3a;--accent-d:#0a3a2c;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(13,77,58,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .num{font-variant-numeric:tabular-nums}
+  /* Header */
+  header{background:linear-gradient(160deg,var(--pitch),var(--pitch-2));color:#fff;padding:18px 16px 0}
+  .wrap{max-width:680px;margin:0 auto}
+  .hero{display:flex;align-items:center;gap:14px;padding-bottom:14px}
+  .logo img{height:46px;width:auto;display:block;border-radius:8px}
+  .badge{height:46px;min-width:46px;padding:0 12px;border-radius:12px;background:var(--gold);color:#1a1a1a;
+    font-family:"Anton",sans-serif;font-size:22px;letter-spacing:1px;display:flex;align-items:center;justify-content:center}
+  .htext .title{font-family:"Anton",sans-serif;font-size:26px;line-height:1;letter-spacing:.5px}
+  .htext .sub{font-size:12.5px;opacity:.85;margin-top:4px;font-weight:500}
+  nav{display:flex;gap:2px;max-width:680px;margin:0 auto}
+  nav button{flex:1;background:none;border:0;color:rgba(255,255,255,.7);font:inherit;font-weight:700;font-size:13.5px;padding:12px 2px;cursor:pointer;border-bottom:3px solid transparent}
+  nav button.on{color:#fff;border-bottom-color:var(--gold)}
+  main{max-width:680px;margin:0 auto;padding:16px 16px 70px}
+  /* Identity */
+  .me{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .me label{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .me .row{display:flex;gap:8px;margin-top:8px;align-items:center}
+  input,select{font:inherit}
+  .me input[type=text]{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:15px}
+  .me .who{font-size:15px}.me .who b{color:var(--accent)}
+  .btn{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:10px 16px;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+  .btn:hover{background:var(--accent-d)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.gold{background:var(--gold);color:#1a1a1a}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  /* Cards / matches */
+  .day{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin:18px 4px 8px}
+  .match,.bonus{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .match .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-bottom:8px;font-weight:500}
+  .match .grp{background:var(--bg);border-radius:5px;padding:1px 7px;font-weight:700}
+  .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+  .team{display:flex;align-items:center;gap:8px;min-width:0}
+  .team.away{flex-direction:row-reverse;text-align:right}
+  .flag{width:28px;height:21px;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.1);display:block;flex:0 0 auto}
+  .flag-emoji{font-size:22px}
+  .tname{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .score{display:flex;align-items:center;gap:6px}
+  .score input{width:42px;height:42px;text-align:center;font-size:18px;font-weight:700;border:1.5px solid var(--line);border-radius:10px;-moz-appearance:textfield}
+  .score input::-webkit-outer-spin-button,.score input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .score input:focus{outline:none;border-color:var(--accent)}
+  .score input:disabled{background:var(--bg);color:var(--mut)}
+  .sep{color:var(--mut);font-weight:700}
+  .result{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .result .final{font-size:20px;font-weight:800}
+  .result .lbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .pts{margin-top:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line);padding-top:8px;color:var(--mut)}
+  .pts b{color:var(--ink)}
+  .pill{background:var(--green);color:#fff;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700}
+  .pill.zero{background:#e6eae8;color:var(--mut)}
+  .locked{font-size:11px;color:var(--mut);font-style:italic}
+  /* Bonus */
+  .bonus .q{font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.35}
+  .bonus .meta{font-size:11px;color:var(--mut);font-weight:600;display:flex;justify-content:space-between;margin-bottom:8px}
+  .bonus input[type=text],.bonus input[type=number],.bonus select{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:15px}
+  .bonus input:disabled,.bonus select:disabled{background:var(--bg);color:var(--mut)}
+  .correct{margin-top:8px;font-size:13px;color:var(--mut);border-top:1px dashed var(--line);padding-top:8px;display:flex;justify-content:space-between;align-items:center}
+  .correct b{color:var(--ink)}
+  .tag{display:inline-block;background:var(--bg);border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;color:var(--mut);margin-left:6px}
+  /* Leaderboard */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:6px 0 16px}
+  .pod{flex:1;max-width:150px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
+  .pod .medal{font-size:26px}
+  .pod .pname{font-weight:800;font-size:14px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pod .ppts{font-size:13px;color:var(--mut);font-weight:700}
+  .pod.first{transform:translateY(-10px);border-color:var(--gold);box-shadow:0 10px 30px rgba(244,180,0,.25)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:13px 14px;text-align:left;font-size:15px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);background:#fafbfb}
+  tr:last-child td{border-bottom:0}
+  td.r{text-align:right}
+  .rank{font-weight:800;width:38px}
+  .rank.p1{color:var(--gold)}.rank.p2{color:var(--silver)}.rank.p3{color:var(--bronze)}
+  .ptsbig{font-weight:800;font-size:17px}
+  .me-row{background:#f0faf4}
+  /* Admin */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .panel h3{margin:0 0 12px;font-size:15px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .field{margin-bottom:8px}
+  .field label{display:block;font-size:11px;font-weight:700;color:var(--mut);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+  .field input,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:14px}
+  .rules{font-size:13px;line-height:1.7;color:var(--mut)}.rules b{color:var(--ink)}
+  .adminmatch{display:flex;align-items:center;gap:6px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+  .adminmatch .nm{flex:1;min-width:150px}
+  .adminmatch input,.adminbq input{width:46px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:6px 4px;font-size:14px;font-weight:700}
+  .adminbq{padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .adminbq .qx{font-weight:700;margin-bottom:6px}
+  .adminbq .ctrl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .adminbq input[type=text]{width:auto;flex:1;min-width:120px;text-align:left;font-weight:500}
+  .empty{text-align:center;color:var(--mut);padding:40px 16px;font-size:14px;line-height:1.5}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transition:.25s;pointer-events:none;z-index:99}
+  .toast.show{opacity:1;bottom:30px}
+  .hint{font-size:12px;color:var(--mut);margin:4px 4px 14px;line-height:1.5}
+  .loading{text-align:center;padding:50px;color:var(--mut)}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!--  CONFIG – only this block matters. Everything is pre-filled. -->
+<!-- ============================================================ -->
+<script>
+  const SUPABASE_URL = "https://dgjfydzjgokzigklgchj.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_mRkwbCEvlRcQL8wk3YSJ4g_6ceY3yUz";
+  const ADMIN_PW     = "WM2026";              // admin password
+  const TEAM_TITEL   = "OPSD World Cup Pool"; // shown in the header
+  const LOGO_URL     = "";                    // e.g. "logo.png" once you add it to the repo
+  const PUNKTE       = { exact:5, diff:3, tendency:2 }; // match scoring
+</script>
+<!-- ============================================================ -->
+
+<header>
+  <div class="wrap hero">
+    <div class="logo" id="logoSlot"></div>
+    <div class="htext">
+      <div class="title" id="teamTitle"></div>
+      <div class="sub">FIFA World Cup 2026 ⚽ · may the best guesser win</div>
+    </div>
+  </div>
+  <nav>
+    <button data-tab="tip" class="on">Matches</button>
+    <button data-tab="bonus">Bonus</button>
+    <button data-tab="rank">Leaderboard</button>
+    <button data-tab="admin">Admin</button>
+  </nav>
+</header>
+
+<main>
+  <div id="meBar" class="me"></div>
+  <div id="view"><div class="loading">Loading …</div></div>
+</main>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ---------- Country -> ISO code (for real flag images) ---------- */
+const ISO={
+  "Mexico":"mx","Mexiko":"mx","South Africa":"za","Südafrika":"za","Brazil":"br","Brasilien":"br",
+  "Morocco":"ma","Marokko":"ma","Netherlands":"nl","Niederlande":"nl","Japan":"jp","Qatar":"qa","Katar":"qa",
+  "Switzerland":"ch","Schweiz":"ch","Canada":"ca","Kanada":"ca","USA":"us","United States":"us",
+  "Germany":"de","Deutschland":"de","France":"fr","Frankreich":"fr","Spain":"es","Spanien":"es",
+  "England":"gb-eng","Scotland":"gb-sct","Wales":"gb-wls","Argentina":"ar","Argentinien":"ar",
+  "Portugal":"pt","Belgium":"be","Belgien":"be","Croatia":"hr","Kroatien":"hr","Italy":"it","Italien":"it",
+  "South Korea":"kr","Südkorea":"kr","Korea Republic":"kr","Ecuador":"ec","Curaçao":"cw","Curacao":"cw",
+  "Ivory Coast":"ci","Elfenbeinküste":"ci","Côte d'Ivoire":"ci","Norway":"no","Norwegen":"no",
+  "Senegal":"sn","Czechia":"cz","Czech Republic":"cz","Tschechien":"cz","Bosnia-Herzegovina":"ba","Bosnien-Herzegowina":"ba",
+  "Paraguay":"py","Uruguay":"uy","Colombia":"co","Kolumbien":"co","Austria":"at","Österreich":"at",
+  "Australia":"au","Iran":"ir","Saudi Arabia":"sa","Ghana":"gh","Nigeria":"ng","Cameroon":"cm","Kamerun":"cm",
+  "Algeria":"dz","Algerien":"dz","Tunisia":"tn","Tunesien":"tn","Egypt":"eg","Ägypten":"eg","Mali":"ml",
+  "Poland":"pl","Polen":"pl","Denmark":"dk","Dänemark":"dk","Sweden":"se","Schweden":"se","Serbia":"rs","Serbien":"rs",
+  "Turkey":"tr","Türkiye":"tr","Türkei":"tr","Greece":"gr","Griechenland":"gr","Ukraine":"ua","Hungary":"hu","Ungarn":"hu",
+  "Romania":"ro","Rumänien":"ro","New Zealand":"nz","Neuseeland":"nz","Costa Rica":"cr","Panama":"pa",
+  "Honduras":"hn","Jamaica":"jm","Jamaika":"jm","Peru":"pe","Chile":"cl","Venezuela":"ve","Bolivia":"bo","Bolivien":"bo",
+  "Cape Verde":"cv","Kap Verde":"cv","DR Congo":"cd","Uzbekistan":"uz","Usbekistan":"uz","Jordan":"jo","Jordanien":"jo",
+  "Iraq":"iq","Irak":"iq","UAE":"ae","United Arab Emirates":"ae"
+};
+function flagHTML(team){
+  const code=ISO[(team||"").trim()];
+  if(code) return `<img class="flag" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="" loading="lazy">`;
+  return `<span class="flag-emoji">🌍</span>`;
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
+
+const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+
+let me=localStorage.getItem("wm_me")||"";
+let matches=[],tips=[],bonusQs=[],bonusAnswers=[],tab="tip",adminOK=false;
+
+/* ---------- Header ---------- */
+$("#teamTitle").textContent=TEAM_TITEL;
+$("#logoSlot").innerHTML = LOGO_URL ? `<img src="${LOGO_URL}" alt="logo">` : `<div class="badge">OPSD</div>`;
+
+/* ---------- Load ---------- */
+async function loadAll(){
+  if(!sb){ $("#view").innerHTML=`<div class="empty">⚠️ Supabase is not configured.</div>`; renderMe(); return; }
+  const [m,t,bq,ba]=await Promise.all([
+    sb.from("matches").select("*").order("sort_order",{ascending:true}).order("id",{ascending:true}),
+    sb.from("tips").select("*"),
+    sb.from("bonus_questions").select("*").order("sort_order",{ascending:true}).order("id",{ascending:true}),
+    sb.from("bonus_answers").select("*")
+  ]);
+  if(m.error||t.error){ $("#view").innerHTML=`<div class="empty">Could not load data. Check the URL/key and that the SQL setup ran.</div>`; return; }
+  matches=m.data||[]; tips=t.data||[];
+  bonusQs=(bq&&!bq.error)?bq.data:[]; bonusAnswers=(ba&&!ba.error)?ba.data:[];
+  renderMe(); renderView();
+}
+
+/* ---------- Match scoring ---------- */
+function scoreOf(pick,m){
+  if(!pick||!m||!m.finished||m.home_score==null||m.away_score==null) return null;
+  const ph=+pick.home_tip,pa=+pick.away_tip,rh=+m.home_score,ra=+m.away_score;
+  if(ph===rh&&pa===ra) return PUNKTE.exact;
+  if(ph-pa===rh-ra) return PUNKTE.diff;
+  if(Math.sign(ph-pa)===Math.sign(rh-ra)) return PUNKTE.tendency;
+  return 0;
+}
+function myPick(id){ return tips.find(x=>x.player===me&&x.match_id===id); }
+
+/* ---------- Bonus scoring ---------- */
+function bonusEarned(q,player){
+  if(!q.resolved||q.correct==null||q.correct==="") return null;
+  const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===player);
+  if(!a) return 0;
+  if(q.qtype==="number"){
+    const target=parseFloat(q.correct);
+    const diffs=bonusAnswers.filter(x=>x.question_id===q.id).map(x=>{const n=parseFloat(x.answer);return isNaN(n)?Infinity:Math.abs(n-target);});
+    const best=Math.min(...diffs);
+    const mine=parseFloat(a.answer);const myd=isNaN(mine)?Infinity:Math.abs(mine-target);
+    return (myd===best&&best!==Infinity)?q.points:0;
+  }
+  return (String(a.answer).trim().toLowerCase()===String(q.correct).trim().toLowerCase())?q.points:0;
+}
+
+/* ---------- Totals ---------- */
+function totals(){
+  const players=new Set();
+  tips.forEach(t=>players.add(t.player));
+  bonusAnswers.forEach(a=>players.add(a.player));
+  return [...players].map(name=>{
+    let pts=0,exact=0,bonus=0;
+    tips.filter(t=>t.player===name).forEach(t=>{const m=matches.find(x=>x.id===t.match_id);const s=scoreOf(t,m);if(s!=null){pts+=s;if(s===PUNKTE.exact)exact++;}});
+    bonusQs.forEach(q=>{const e=bonusEarned(q,name);if(e){pts+=e;bonus+=e;}});
+    return {name,pts,exact,bonus};
+  }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name));
+}
+
+/* ---------- Identity ---------- */
+function renderMe(){
+  const bar=$("#meBar");
+  if(!me){
+    bar.innerHTML=`<label>Who are you?</label>
+      <div class="row"><input id="nameIn" type="text" placeholder="Your name" maxlength="24"><button class="btn" id="setName">Join</button></div>
+      <div class="hint" style="margin:8px 0 0">Your name puts you on the leaderboard. Spell it the same way every time. 😉</div>`;
+    $("#setName").onclick=()=>{const v=$("#nameIn").value.trim();if(!v)return;me=v;localStorage.setItem("wm_me",me);renderMe();renderView();};
+    $("#nameIn").onkeydown=e=>{if(e.key==="Enter")$("#setName").click();};
+  }else{
+    bar.innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><div class="who">Playing as <b>${esc(me)}</b></div><button class="btn ghost sm" id="logout">switch</button></div>`;
+    $("#logout").onclick=()=>{me="";localStorage.removeItem("wm_me");renderMe();renderView();};
+  }
+}
+
+/* ---------- Matches ---------- */
+function matchCard(m){
+  const pick=myPick(m.id)||{};
+  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span>${esc(m.match_date)} · ${esc(m.match_time)}${m.locked&&!m.finished?" · 🔒 closed":""}</span></div>`;
+  if(m.finished){
+    const s=scoreOf(pick,m);const has=pick.home_tip!=null;
+    return `<div class="match">${head}
+      <div class="teams">
+        <div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div>
+        <div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div>
+        <div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div>
+      </div>
+      <div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>
+        ${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div></div>`;
+  }
+  const dis=m.locked?"disabled":"";
+  return `<div class="match" data-m="${m.id}">${head}
+    <div class="teams">
+      <div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div>
+      <div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis}><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis}></div>
+      <div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div>
+    </div></div>`;
+}
+function renderTip(){
+  if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Admin</b> tab.</div>`;
+  if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
+  let html="",last="";
+  matches.forEach(m=>{if(m.match_date!==last){html+=`<div class="day">${esc(m.match_date)}</div>`;last=m.match_date;}html+=matchCard(m);});
+  if(matches.some(m=>!m.finished&&!m.locked)) html+=`<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`;
+  return html;
+}
+async function saveTips(){
+  const rows=[];
+  document.querySelectorAll('.match[data-m]').forEach(c=>{const id=+c.dataset.m;const h=c.querySelector('[data-side=h]').value,a=c.querySelector('[data-side=a]').value;if(h!==""&&a!=="")rows.push({player:me,match_id:id,home_tip:+h,away_tip:+a});});
+  if(!rows.length){toast("Nothing to save yet");return;}
+  const {error}=await sb.from("tips").upsert(rows,{onConflict:"player,match_id"});
+  if(error){toast("Save failed");return;}
+  await loadAll();toast("Predictions saved ✓");
+}
+
+/* ---------- Bonus ---------- */
+function bonusCard(q){
+  const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===me);
+  const myVal=a?a.answer:"";
+  const meta=`<div class="meta"><span>${q.points} pts ${q.qtype==="number"?"· closest wins":""}</span><span>${q.resolved?"✅ resolved":(q.locked?"🔒 closed":"open")}</span></div>`;
+  let control="";
+  if(q.resolved||q.locked){
+    control=`<input type="text" value="${esc(myVal||"—")}" disabled>`;
+  }else if(q.qtype==="choice"){
+    const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})();
+    control=`<select data-q="${q.id}"><option value="">Choose…</option>${opts.map(o=>`<option ${myVal===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  }else if(q.qtype==="number"){
+    control=`<input type="number" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your number">`;
+  }else{
+    control=`<input type="text" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your answer">`;
+  }
+  let footer="";
+  if(q.resolved){
+    const e=bonusEarned(q,me);
+    footer=`<div class="correct"><span>Correct: <b>${esc(q.correct)}</b></span>${a?`<span class="pill ${e?"":"zero"}">${e||0} pts</span>`:`<span class="locked">no answer</span>`}</div>`;
+  }
+  return `<div class="bonus">${meta}<div class="q">${esc(q.question)}</div>${control}${footer}</div>`;
+}
+function renderBonus(){
+  if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to play the bonus round.</div>`;
+  if(!bonusQs.length) return `<div class="empty">No bonus questions yet.<br>Big-picture predictions for the whole tournament will appear here. 🎲</div>`;
+  let html=`<div class="hint">🎲 Tournament-long predictions. High risk, high reward — these can decide the whole pool.</div>`;
+  html+=bonusQs.map(bonusCard).join("");
+  if(bonusQs.some(q=>!q.resolved&&!q.locked)) html+=`<button class="btn gold" id="saveBonus" style="width:100%;padding:14px;margin-top:8px;color:#1a1a1a">Save bonus answers</button>`;
+  return html;
+}
+async function saveBonus(){
+  const rows=[];
+  document.querySelectorAll('[data-q]').forEach(el=>{const id=+el.dataset.q;const v=String(el.value).trim();if(v!=="")rows.push({player:me,question_id:id,answer:v});});
+  if(!rows.length){toast("Nothing to save yet");return;}
+  const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"});
+  if(error){toast("Save failed");return;}
+  await loadAll();toast("Bonus answers saved ✓");
+}
+
+/* ---------- Leaderboard ---------- */
+function renderRank(){
+  const t=totals();
+  if(!t.length) return `<div class="empty">No predictions yet.<br>Be the first — glory (and bragging rights) await. 🏆</div>`;
+  const any=matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved);
+  let podium="";
+  if(t.length>=3){
+    const p=t.slice(0,3);const ord=[p[1],p[0],p[2]];const cls=["second","first","third"];const med=["🥈","🥇","🥉"];const idx=[1,0,2];
+    podium=`<div class="podium">${ord.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`;
+  }
+  const rows=t.map((p,i)=>{const r=i+1,c=r<=3?"p"+r:"";
+    return `<tr class="${p.name===me?"me-row":""}"><td class="rank ${c}">${r}</td><td>${esc(p.name)}${p.name===me?" <span style='color:var(--accent);font-size:12px'>(you)</span>":""}</td><td class="r num">${p.exact}</td><td class="r"><span class="ptsbig num">${p.pts}</span></td></tr>`;}).join("");
+  return `${podium}${any?"":`<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>`}
+    <table><thead><tr><th>#</th><th>Player</th><th class="r" title="exact scores">🎯</th><th class="r">Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ---------- Admin ---------- */
+function renderAdmin(){
+  if(!adminOK) return `<div class="panel"><h3>Admin area</h3><div class="field"><label>Password</label><input id="apw" type="password" placeholder="Password"></div><button class="btn" id="alogin">Sign in</button></div>`;
+  const phases=["Group","Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
+  const mlist=matches.map(m=>`<div class="adminmatch" data-am="${m.id}">
+      <span class="nm">${flagHTML(m.home)} ${esc(m.home)} – ${esc(m.away)} ${flagHTML(m.away)} <span style="color:var(--mut)">(${esc(m.match_date)})</span></span>
+      <input type="number" min="0" data-side="hs" value="${m.home_score??""}" placeholder="–"><span style="color:var(--mut)">:</span><input type="number" min="0" data-side="as" value="${m.away_score??""}" placeholder="–">
+      <button class="btn sm ghost" data-lock="${m.id}">${m.locked?"🔒":"🔓"}</button>
+      <button class="btn sm ${m.finished?"ghost":""}" data-fin="${m.id}">${m.finished?"scored ✓":"score"}</button>
+      <button class="btn ghost sm" data-del="${m.id}">✕</button></div>`).join("");
+  const bqlist=bonusQs.map(q=>{
+    let setter;
+    if(q.qtype==="choice"){const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})();setter=`<select data-bc="${q.id}"><option value="">– correct –</option>${opts.map(o=>`<option ${q.correct===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;}
+    else setter=`<input type="${q.qtype==="number"?"number":"text"}" data-bc="${q.id}" value="${esc(q.correct??"")}" placeholder="correct answer" style="width:auto;flex:1;min-width:110px;text-align:left">`;
+    return `<div class="adminbq" data-aq="${q.id}"><div class="qx">${esc(q.question)} <span class="tag">${q.qtype}</span><span class="tag">${q.points} pts</span></div>
+      <div class="ctrl">${setter}
+        <button class="btn sm ghost" data-block="${q.id}">${q.locked?"🔒":"🔓"}</button>
+        <button class="btn sm ${q.resolved?"ghost":""}" data-bres="${q.id}">${q.resolved?"resolved ✓":"resolve"}</button>
+        <button class="btn ghost sm" data-bdel="${q.id}">✕</button></div></div>`;
+  }).join("");
+  return `
+    <div class="panel"><h3>Add match</h3>
+      <div class="grid2">
+        <div class="field"><label>Home</label><input id="nh" placeholder="e.g. Switzerland"></div>
+        <div class="field"><label>Away</label><input id="na" placeholder="e.g. Qatar"></div>
+        <div class="field"><label>Date</label><input id="nd" placeholder="Sat 13 Jun"></div>
+        <div class="field"><label>Time</label><input id="nt" placeholder="21:00"></div>
+        <div class="field"><label>Phase</label><select id="np">${phases.map(p=>`<option>${p}</option>`).join("")}</select></div>
+        <div class="field"><label>Group (group stage only)</label><input id="ng" placeholder="A" maxlength="2"></div>
+      </div><button class="btn" id="addMatch">Add match</button>
+      <div class="hint" style="margin-top:8px">Tip: type the country in English or German — flags are detected automatically.</div></div>
+
+    <div class="panel"><h3>Match results & control</h3>${mlist||'<div class="hint">No matches.</div>'}
+      <div class="hint" style="margin-top:12px">🔒 closes predictions before kickoff. „score" counts the match for the leaderboard (enter the result first).</div></div>
+
+    <div class="panel"><h3>Add bonus question</h3>
+      <div class="field"><label>Question</label><input id="bq" placeholder="e.g. Who will win the World Cup?"></div>
+      <div class="grid2">
+        <div class="field"><label>Type</label><select id="bt"><option value="text">Free text</option><option value="number">Number (closest wins)</option><option value="choice">Multiple choice</option></select></div>
+        <div class="field"><label>Points</label><input id="bp" type="number" value="5"></div>
+      </div>
+      <div class="field"><label>Options (choice only, comma-separated)</label><input id="bo" placeholder="Yes, No"></div>
+      <button class="btn" id="addBonus">Add bonus question</button>
+      <div class="hint" style="margin-top:8px">Enter the correct answer below once it's known, then hit „resolve" to award points.</div></div>
+
+    <div class="panel"><h3>Bonus questions</h3>${bqlist||'<div class="hint">No bonus questions yet.</div>'}</div>
+
+    <div class="panel"><h3>Scoring</h3><div class="rules">
+      Matches: <b>${PUNKTE.exact}</b> exact · <b>${PUNKTE.diff}</b> goal difference · <b>${PUNKTE.tendency}</b> tendency · 0 wrong.<br>
+      Bonus: points set per question. „Number" questions reward whoever is <b>closest</b>.</div></div>`;
+}
+
+/* ---------- Router ---------- */
+function renderView(){
+  const v=$("#view");
+  v.innerHTML = tab==="tip"?renderTip() : tab==="bonus"?renderBonus() : tab==="rank"?renderRank() : renderAdmin();
+  bind();
+}
+function bind(){
+  if(tab==="tip"){const s=$("#saveTips");if(s)s.onclick=saveTips;}
+  if(tab==="bonus"){const s=$("#saveBonus");if(s)s.onclick=saveBonus;}
+  if(tab==="admin"&&!adminOK){const b=$("#alogin");if(b){b.onclick=()=>{if($("#apw").value===ADMIN_PW){adminOK=true;renderView();}else toast("Wrong password");};$("#apw").onkeydown=e=>{if(e.key==="Enter")b.click();};}}
+  if(tab==="admin"&&adminOK){
+    $("#addMatch").onclick=async()=>{
+      const h=$("#nh").value.trim(),a=$("#na").value.trim();if(!h||!a){toast("Enter home and away");return;}
+      const order=(matches.reduce((mx,x)=>Math.max(mx,x.sort_order||0),0))+1;
+      const {error}=await sb.from("matches").insert([{phase:$("#np").value,grp:$("#ng").value.trim()||null,match_date:$("#nd").value.trim()||"TBD",match_time:$("#nt").value.trim()||"—",home:h,away:a,sort_order:order}]);
+      if(error){toast("Error");return;} await loadAll();toast("Match added");
+    };
+    document.querySelectorAll('[data-fin]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.fin,row=btn.closest('[data-am]'),m=matches.find(x=>x.id===id);
+      if(!m.finished){const hs=row.querySelector('[data-side=hs]').value,as=row.querySelector('[data-side=as]').value;if(hs===""||as===""){toast("Enter the result");return;}await sb.from("matches").update({home_score:+hs,away_score:+as,finished:true,locked:true}).eq("id",id);}
+      else await sb.from("matches").update({finished:false}).eq("id",id);
+      await loadAll();
+    });
+    document.querySelectorAll('[data-lock]').forEach(btn=>btn.onclick=async()=>{const id=+btn.dataset.lock,m=matches.find(x=>x.id===id);await sb.from("matches").update({locked:!m.locked}).eq("id",id);await loadAll();});
+    document.querySelectorAll('[data-del]').forEach(btn=>btn.onclick=async()=>{if(!confirm("Delete match?"))return;await sb.from("matches").delete().eq("id",+btn.dataset.del);await loadAll();});
+    // bonus admin
+    const ab=$("#addBonus");if(ab)ab.onclick=async()=>{
+      const q=$("#bq").value.trim();if(!q){toast("Enter a question");return;}
+      const type=$("#bt").value;const pts=+$("#bp").value||5;
+      let options=null;if(type==="choice"){const arr=$("#bo").value.split(",").map(s=>s.trim()).filter(Boolean);if(arr.length<2){toast("Choice needs ≥2 options");return;}options=JSON.stringify(arr);}
+      const order=(bonusQs.reduce((mx,x)=>Math.max(mx,x.sort_order||0),0))+1;
+      const {error}=await sb.from("bonus_questions").insert([{question:q,qtype:type,options,points:pts,sort_order:order}]);
+      if(error){toast("Error");return;} await loadAll();toast("Bonus question added");
+    };
+    document.querySelectorAll('[data-bres]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.bres,q=bonusQs.find(x=>x.id===id),row=btn.closest('[data-aq]');
+      if(!q.resolved){const v=String(row.querySelector('[data-bc]').value).trim();if(v===""){toast("Enter the correct answer");return;}await sb.from("bonus_questions").update({correct:v,resolved:true,locked:true}).eq("id",id);}
+      else await sb.from("bonus_questions").update({resolved:false}).eq("id",id);
+      await loadAll();
+    });
+    document.querySelectorAll('[data-block]').forEach(btn=>btn.onclick=async()=>{const id=+btn.dataset.block,q=bonusQs.find(x=>x.id===id);await sb.from("bonus_questions").update({locked:!q.locked}).eq("id",id);await loadAll();});
+    document.querySelectorAll('[data-bdel]').forEach(btn=>btn.onclick=async()=>{if(!confirm("Delete bonus question?"))return;await sb.from("bonus_questions").delete().eq("id",+btn.dataset.bdel);await loadAll();});
+  }
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=async()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');tab=b.dataset.tab;if(tab!=="admin")await loadAll();else renderView();});
+
+loadAll();
+</script>
+</body>
+</html>
