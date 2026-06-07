@@ -78,15 +78,99 @@
   .pod .pname{font-weight:800;font-size:14px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pod .ppts{font-size:13px;color:var(--mut);font-weight:700}
   .pod.first{transform:translateY(-10px);border-color:var(--gold);box-shadow:0 10px 30px rgba(244,180,0,.25)}
-  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
-  th,td{padding:13px 14px;text-align:left;font-size:15px;border-bottom:1px solid var(--line)}
-  th{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);background:#fafbfb}
-  tr:last-child td{border-bottom:0}
-  td.r{text-align:right}
-  .rank{font-weight:800;width:38px}
-  .rank.p1{color:var(--gold)}.rank.p2{color:var(--silver)}.rank.p3{color:var(--bronze)}
-  .ptsbig{font-weight:800;font-size:17px}
-  .me-row{background:#f0faf4}
+  
+table.rank-table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+table.rank-table col.col-rank  { width:58px; }
+table.rank-table col.col-player{ width:auto; }
+table.rank-table col.col-hit   { width:92px; }
+table.rank-table col.col-bonus { width:110px; }
+table.rank-table col.col-total { width:110px; }
+
+table.rank-table th,
+table.rank-table td{
+  padding:16px 14px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+
+table.rank-table th{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color:var(--mut);
+  background:#fafbfb;
+  font-weight:800;
+}
+
+table.rank-table tr:last-child td{
+  border-bottom:0;
+}
+
+table.rank-table th.rank-h,
+table.rank-table td.rank{
+  text-align:left;
+}
+
+table.rank-table th.player-h,
+table.rank-table td.player{
+  text-align:left;
+}
+
+table.rank-table th.stat-h,
+table.rank-table td.stat,
+table.rank-table th.total-h,
+table.rank-table td.total{
+  text-align:right;
+}
+
+table.rank-table td.rank{
+  font-weight:800;
+  font-size:17px;
+}
+
+table.rank-table td.player{
+  font-size:17px;
+  font-weight:700;
+}
+
+table.rank-table td.stat{
+  font-size:17px;
+  font-variant-numeric:tabular-nums;
+}
+
+table.rank-table td.total{
+  font-size:18px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+
+.me-row{
+  background:#f0faf4;
+}
+
+.rank.p1{color:var(--gold)}
+.rank.p2{color:var(--silver)}
+.rank.p3{color:var(--bronze)}
+
+.you-tag{
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  margin-left:6px;
+  white-space:nowrap;
+}
+  
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
   .panel h3{margin:0 0 12px;font-size:15px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -560,15 +644,12 @@ function renderRank(){
     return `
       <tr class="${p.name===me ? "me-row" : ""}">
         <td class="rank ${rankCls}">${r}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-weight:700">${esc(p.name)}</span>
-            ${p.name===me ? `<span style="color:var(--accent);font-size:12px;font-weight:700">(you)</span>` : ``}
-          </div>
+        <td class="player">
+          ${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}
         </td>
-        <td class="r num">${p.exact}</td>
-        <td class="r num">${p.bonus}</td>
-        <td class="r"><span class="ptsbig num">${p.pts}</span></td>
+        <td class="stat num">${p.exact}</td>
+        <td class="stat num">${p.bonus}</td>
+        <td class="total num">${p.pts}</td>
       </tr>
     `;
   }).join("");
@@ -585,14 +666,21 @@ function renderRank(){
   return `
     ${podium}
     ${!anyScored ? `<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>` : ``}
-    <table>
+    <table class="rank-table">
+      <colgroup>
+        <col class="col-rank">
+        <col class="col-player">
+        <col class="col-hit">
+        <col class="col-bonus">
+        <col class="col-total">
+      </colgroup>
       <thead>
         <tr>
-          <th style="width:44px">#</th>
-          <th>Player</th>
-          <th class="r" title="Exact score hits">Exact</th>
-          <th class="r" title="Bonus question points">Bonus</th>
-          <th class="r">Total</th>
+          <th class="rank-h">#</th>
+          <th class="player-h">Player</th>
+          <th class="stat-h" title="Correct exact scores">🎯 Hits</th>
+          <th class="stat-h" title="Bonus question points">Bonus</th>
+          <th class="total-h">Total</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
