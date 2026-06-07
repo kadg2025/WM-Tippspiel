@@ -78,106 +78,37 @@
   .pod .pname{font-weight:800;font-size:14px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pod .ppts{font-size:13px;color:var(--mut);font-weight:700}
   .pod.first{transform:translateY(-10px);border-color:var(--gold);box-shadow:0 10px 30px rgba(244,180,0,.25)}
-  
-table.rank-table{
-  width:100%;
-  table-layout:fixed;
-  border-collapse:separate;
-  border-spacing:0;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-}
 
-table.rank-table col.col-rank  { width:58px; }
-table.rank-table col.col-player{ width:auto; }
-table.rank-table col.col-hit   { width:92px; }
-table.rank-table col.col-bonus { width:110px; }
-table.rank-table col.col-total { width:110px; }
+  table.rank-table{
+    width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)
+  }
+  table.rank-table col.col-rank{width:58px}
+  table.rank-table col.col-player{width:auto}
+  table.rank-table col.col-hit{width:92px}
+  table.rank-table col.col-bonus{width:110px}
+  table.rank-table col.col-total{width:110px}
+  table.rank-table th,table.rank-table td{padding:16px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.rank-table th{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);background:#fafbfb;font-weight:800}
+  table.rank-table tr:last-child td{border-bottom:0}
+  table.rank-table th.rank-h,table.rank-table td.rank{text-align:left}
+  table.rank-table th.player-h,table.rank-table td.player{text-align:left}
+  table.rank-table th.stat-h,table.rank-table td.stat,table.rank-table th.total-h,table.rank-table td.total{text-align:right}
+  table.rank-table td.rank{font-weight:800;font-size:17px}
+  table.rank-table td.player{font-size:17px;font-weight:700}
+  table.rank-table td.stat{font-size:17px;font-variant-numeric:tabular-nums}
+  table.rank-table td.total{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+  .me-row{background:#f0faf4}
+  .rank.p1{color:var(--gold)} .rank.p2{color:var(--silver)} .rank.p3{color:var(--bronze)}
+  .you-tag{color:var(--accent);font-size:12px;font-weight:800;margin-left:6px;white-space:nowrap}
 
-table.rank-table th,
-table.rank-table td{
-  padding:16px 14px;
-  border-bottom:1px solid var(--line);
-  vertical-align:middle;
-}
-
-table.rank-table th{
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.8px;
-  color:var(--mut);
-  background:#fafbfb;
-  font-weight:800;
-}
-
-table.rank-table tr:last-child td{
-  border-bottom:0;
-}
-
-table.rank-table th.rank-h,
-table.rank-table td.rank{
-  text-align:left;
-}
-
-table.rank-table th.player-h,
-table.rank-table td.player{
-  text-align:left;
-}
-
-table.rank-table th.stat-h,
-table.rank-table td.stat,
-table.rank-table th.total-h,
-table.rank-table td.total{
-  text-align:right;
-}
-
-table.rank-table td.rank{
-  font-weight:800;
-  font-size:17px;
-}
-
-table.rank-table td.player{
-  font-size:17px;
-  font-weight:700;
-}
-
-table.rank-table td.stat{
-  font-size:17px;
-  font-variant-numeric:tabular-nums;
-}
-
-table.rank-table td.total{
-  font-size:18px;
-  font-weight:800;
-  font-variant-numeric:tabular-nums;
-}
-
-.me-row{
-  background:#f0faf4;
-}
-
-.rank.p1{color:var(--gold)}
-.rank.p2{color:var(--silver)}
-.rank.p3{color:var(--bronze)}
-
-.you-tag{
-  color:var(--accent);
-  font-size:12px;
-  font-weight:800;
-  margin-left:6px;
-  white-space:nowrap;
-}
-  
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
   .panel h3{margin:0 0 12px;font-size:15px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .field{margin-bottom:8px}
   .field label{display:block;font-size:11px;font-weight:700;color:var(--mut);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
   .field input,.field select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:14px}
-  .rules{font-size:13px;line-height:1.7;color:var(--mut)}.rules b{color:var(--ink)}
+  .rules{font-size:13px;line-height:1.7;color:var(--mut)} .rules b{color:var(--ink)}
   .adminmatch{display:flex;align-items:center;gap:6px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
   .adminmatch .nm{flex:1;min-width:150px}
   .adminmatch input,.adminbq input{width:46px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:6px 4px;font-size:14px;font-weight:700}
@@ -251,14 +182,14 @@ table.rank-table td.total{
       <div class="sub">FIFA World Cup 2026 ⚽ · may the best guesser win</div>
     </div>
   </div>
-  <nav>
-    <button data-tab="tip" class="on">Matches</button>
-    <button data-tab="bonus">Bonus</button>
-    <button data-tab="rank">Leaderboard</button>
-    <button data-tab="prizes">Prizes</button>
-    <button data-tab="rules">Rules</button>
-    <button data-tab="admin">Admin</button>
-  </nav>
+<nav>
+  <button data-tab="tip" class="on">Matches</button>
+  <button data-tab="bonus">Bonus</button>
+  <button data-tab="rank">Flight Deck</button>
+  <button data-tab="prizes">Prizes</button>
+  <button data-tab="rules">Rules</button>
+  <button data-tab="admin">Control Tower</button>
+</nav>
 </header>
 
 <main>
@@ -296,7 +227,7 @@ function flagHTML(team){
   return `<span class="flag-emoji">🌍</span>`;
 }
 const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s==null?"":s).replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
 
 const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
@@ -342,6 +273,17 @@ function isClosed(m){
   if(m.kickoff){ const k=new Date(m.kickoff).getTime(); if(!isNaN(k)&&Date.now()>=k-5*60*1000) return true; }
   return false;
 }
+function statusBanner(m){
+  if(m.finished) return `<div class="hint" style="margin:8px 0 0">✅ Final score confirmed</div>`;
+  if(!m.kickoff) return "";
+  const ms = new Date(m.kickoff).getTime() - Date.now();
+  if(isNaN(ms)) return "";
+  const min = Math.floor(ms/60000);
+  if(min < 0) return `<div class="hint" style="margin:8px 0 0;color:#b45309;font-weight:700">🛑 Gate closed</div>`;
+  if(min <= 15) return `<div class="hint" style="margin:8px 0 0;color:#b45309;font-weight:700">⏳ Gate closes in ${min} min</div>`;
+  if(min <= 60) return `<div class="hint" style="margin:8px 0 0;color:var(--accent);font-weight:700">🛫 Boarding soon</div>`;
+  return "";
+}
 function myPick(id){ return tips.find(x=>x.player===me&&x.match_id===id); }
 
 function bonusEarned(q,player){
@@ -374,12 +316,30 @@ function totals(){
   }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name));
 }
 
+const OPS_NEWS = [
+  { title:"Crew update", text:"Welcome to the OPSD World Cup Pool. Flight Deck rankings go live as soon as the first matches are scored." },
+  { title:"Reminder", text:"Predictions close automatically 5 minutes before kickoff." },
+  { title:"Prize cargo", text:"SWISS Schoki is secured and ready for delivery." }
+];
+function renderNewsBox(){
+  return `
+    <div class="panel" style="margin-bottom:12px">
+      <h3>Ops Updates</h3>
+      ${OPS_NEWS.map((n,i)=>`
+        <div style="padding:8px 0;${i<OPS_NEWS.length-1?'border-bottom:1px dashed var(--line)':''}">
+          <div style="font-weight:800;font-size:14px">${esc(n.title)}</div>
+          <div style="font-size:13px;color:var(--mut);margin-top:2px;line-height:1.5">${esc(n.text)}</div>
+        </div>
+      `).join("")}
+    </div>`;
+}
+
 function renderMe(){
   const bar=$("#meBar");
   if(!me){
     bar.innerHTML=`<label>Who are you?</label>
       <div class="row"><input id="nameIn" type="text" placeholder="Your name" maxlength="24"><button class="btn" id="setName">Join</button></div>
-      <div class="hint" style="margin:8px 0 0">Your name puts you on the leaderboard. Spell it the same way every time. 😉</div>`;
+      <div class="hint" style="margin:8px 0 0">Your name puts you on the Flight Deck. Spell it the same way every time. 😉</div>`;
     $("#setName").onclick=()=>{
       const v=$("#nameIn").value.trim();
       if(!v)return;
@@ -425,7 +385,7 @@ function toggleReveal(id,btn){
 function matchCard(m){
   const pick=myPick(m.id)||{};
   const closed=isClosed(m);
-  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span>${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🔒 closed":""}</span></div>`;
+  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span>${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></div>`;
 
   if(m.finished){
     const s=scoreOf(pick,m),has=pick.home_tip!=null;
@@ -435,6 +395,7 @@ function matchCard(m){
         <div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div>
         <div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div>
       </div>
+      ${statusBanner(m)}
       <div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>
         ${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>
       ${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`;
@@ -454,11 +415,13 @@ function matchCard(m){
         <input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0">
       </div>
       <div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div>
-    </div>${revealSection}</div>`;
+    </div>
+    ${statusBanner(m)}
+    ${revealSection}</div>`;
 }
 
 function renderTip(){
-  if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Admin</b> tab.</div>`;
+  if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Control Tower</b> tab.</div>`;
   if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
 
   const groupMatches=matches.filter(m=>m.phase==="Group");
@@ -498,7 +461,7 @@ function renderTip(){
   const progress=open.length?`<div class="hint" style="margin-bottom:10px">📝 ${filled.length}/${open.length} picks entered for this round</div>`:"";
   const saveBtn=fallback.some(m=>!isClosed(m))?`<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`:"";
 
-  return (hasRounds?nav:"")+progress+html+saveBtn;
+  return (hasRounds?nav:"")+renderNewsBox()+progress+html+saveBtn;
 }
 
 async function saveTips(){
@@ -517,49 +480,21 @@ async function saveTips(){
     const aRaw = aEl ? aEl.value.trim() : "";
 
     if(hRaw === "" && aRaw === "") return;
-
-    if(hRaw === "" || aRaw === ""){
-      missing = true;
-      return;
-    }
+    if(hRaw === "" || aRaw === ""){ missing = true; return; }
 
     const h = Number(hRaw);
     const a = Number(aRaw);
+    if(!Number.isFinite(h) || !Number.isFinite(a) || h < 0 || a < 0){ invalid = true; return; }
 
-    if(!Number.isFinite(h) || !Number.isFinite(a) || h < 0 || a < 0){
-      invalid = true;
-      return;
-    }
-
-    rows.push({
-      player: me,
-      match_id: id,
-      home_tip: Math.round(h),
-      away_tip: Math.round(a)
-    });
+    rows.push({ player: me, match_id: id, home_tip: Math.round(h), away_tip: Math.round(a) });
   });
 
-  if(missing){
-    toast("Please enter both home and away goals.");
-    return;
-  }
-
-  if(invalid){
-    toast("Goals must be 0 or higher.");
-    return;
-  }
-
-  if(!rows.length){
-    toast("Nothing to save yet.");
-    return;
-  }
+  if(missing){ toast("Please enter both home and away goals."); return; }
+  if(invalid){ toast("Goals must be 0 or higher."); return; }
+  if(!rows.length){ toast("Nothing to save yet."); return; }
 
   const { error } = await sb.from("tips").upsert(rows, { onConflict: "player,match_id" });
-  if(error){
-    toast("Save failed.");
-    return;
-  }
-
+  if(error){ toast("Save failed."); return; }
   await loadAll();
   toast("Predictions saved.");
 }
@@ -616,26 +551,22 @@ function fireConfetti(){
 function renderRank(){
   const t = totals();
   if(!t.length){
-    return `<div class="empty">No predictions yet.<br>Be the first — glory and bragging rights await.</div>`;
+    return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`;
   }
 
   const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved);
-
   let podium = "";
   if(t.length >= 3){
     const p = t.slice(0,3);
     const order = [p[1], p[0], p[2]].filter(Boolean);
     const cls = ["second","first","third"];
     const med = ["🥈","🥇","🥉"];
-    podium = `<div class="podium">${
-      order.map((pl,i)=>`
-        <div class="pod ${cls[i]}">
-          <div class="medal">${med[i]}</div>
-          <div class="pname">${esc(pl.name)}</div>
-          <div class="ppts num">${pl.pts} pts</div>
-        </div>
-      `).join("")
-    }</div>`;
+    podium = `<div class="podium">${order.map((pl,i)=>`
+      <div class="pod ${cls[i]}">
+        <div class="medal">${med[i]}</div>
+        <div class="pname">${esc(pl.name)}</div>
+        <div class="ppts num">${pl.pts} pts</div>
+      </div>`).join("")}</div>`;
   }
 
   const rows = t.map((p,i)=>{
@@ -644,48 +575,21 @@ function renderRank(){
     return `
       <tr class="${p.name===me ? "me-row" : ""}">
         <td class="rank ${rankCls}">${r}</td>
-        <td class="player">
-          ${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}
-        </td>
+        <td class="player">${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</td>
         <td class="stat num">${p.exact}</td>
         <td class="stat num">${p.bonus}</td>
         <td class="total num">${p.pts}</td>
-      </tr>
-    `;
+      </tr>`;
   }).join("");
 
-  if(me && t.length && t[0].name === me){
-    if(_lastRank1 !== me){
-      _lastRank1 = me;
-      setTimeout(fireConfetti, 200);
-    }
-  } else {
-    _lastRank1 = null;
-  }
+  if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; }
 
-  return `
-    ${podium}
-    ${!anyScored ? `<div class="hint">The leaderboard fills up once matches are scored or bonus questions resolved.</div>` : ``}
+  return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}
     <table class="rank-table">
-      <colgroup>
-        <col class="col-rank">
-        <col class="col-player">
-        <col class="col-hit">
-        <col class="col-bonus">
-        <col class="col-total">
-      </colgroup>
-      <thead>
-        <tr>
-          <th class="rank-h">#</th>
-          <th class="player-h">Player</th>
-          <th class="stat-h" title="Correct exact scores">🎯 Hits</th>
-          <th class="stat-h" title="Bonus question points">Bonus</th>
-          <th class="total-h">Total</th>
-        </tr>
-      </thead>
+      <colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-bonus"><col class="col-total"></colgroup>
+      <thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Correct exact scores">🎯 Hits</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table>
-  `;
+    </table>`;
 }
 
 function renderRules(){
@@ -693,12 +597,11 @@ function renderRules(){
   return `
   <div class="rcard">
     <h3>How to play 🎮</h3>
-    <div class="lead">Predict the score of every match. Climb the leaderboard. Win chocolate. That's the whole sport.</div>
+    <div class="lead">Predict the score of every match. Climb the Flight Deck. Win chocolate. That's the whole sport.</div>
     <div class="rrow"><span class="pp">⏱️</span><span>Place or change a pick until <b>5 minutes before kickoff</b>. After that it's locked — no take-backs, no "I meant to change it", no mercy.</span></div>
     <div class="rrow"><span class="pp">🥅</span><span>For knockout games, predict the score <b>after 120 minutes</b> (extra time counts, penalty-shootout goals do <b>not</b>). A 1:1 thriller that goes to penalties is scored as 1:1.</span></div>
-    <div class="rrow"><span class="pp">🧑</span><span>Enter your name to play — and spell it the same way every time. "Beat", "beat" and "BEAT the Legend" are three different humans to the leaderboard.</span></div>
+    <div class="rrow"><span class="pp">🧑</span><span>Enter your name to play — and spell it the same way every time. "Beat", "beat" and "BEAT the Legend" are three different humans to the Flight Deck.</span></div>
   </div>
-
   <div class="rcard">
     <h3>Points · Group stage</h3>
     <div class="lead">Points add up — a perfect call stacks all four.</div>
@@ -708,7 +611,6 @@ function renderRules(){
     <div class="rrow"><span class="pp">${g.diff} pts</span><span>Correct goal difference (with the right winner).</span></div>
     <div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Group"})} points.</div>
   </div>
-
   <div class="rcard">
     <h3>Points · Knockout stage</h3>
     <div class="lead">Same idea, double the drama — everything's worth more.</div>
@@ -718,14 +620,12 @@ function renderRules(){
     <div class="rrow ko"><span class="pp">${k.diff} pts</span><span>Correct goal difference (with the right winner).</span></div>
     <div class="rmax">🎯 Exact score = ${maxPts({phase:"Final"})} points.</div>
   </div>
-
   <div class="rcard">
     <h3>Bonus questions 🎲</h3>
     <div class="rrow"><span class="pp">50 pts</span><span>Correctly calling the <b>World Champion</b>. The big one — choose wisely.</span></div>
     <div class="rrow"><span class="pp">20 pts</span><span>Each other bonus question you get right.</span></div>
     <div class="rrow"><span class="pp">📐</span><span>For "how many…" questions, the <b>closest</b> guess takes the points. Optimists and realists both welcome.</span></div>
   </div>
-
   <div class="rcard">
     <h3>Fair play 🤝</h3>
     <div class="rrow"><span class="pp">0️⃣</span><span>Everyone starts at <b>0 points</b> when they join — even if matches have already been played. No time machines, no head starts.</span></div>
@@ -734,26 +634,14 @@ function renderRules(){
 }
 
 function renderPrizes(){
-  const tiers=[
-    {medal:"🥇",place:"1st place",n:3,cls:"gold"},
-    {medal:"🥈",place:"2nd place",n:2,cls:""},
-    {medal:"🥉",place:"3rd place",n:1,cls:""}
-  ];
-  return `
-    <div class="prizehero">
-      <img src="${PRIZE_IMG}" alt="SWISS Schoki">
-      <div><div class="ph-title">SWISS Schoki 🍫</div>
-        <div class="ph-sub">The legendary in-flight chocolate — glory you can actually eat.</div></div>
-    </div>
-    ${tiers.map(t=>`<div class="prize ${t.cls}">
-      <div class="pmedal">${t.medal}</div>
-      <div class="pinfo"><div class="pplace">${t.place}</div><div class="pwin">${t.n}× SWISS Schoki</div></div>
-      <div class="pcount">${"🍫".repeat(t.n)}</div></div>`).join("")}
+  const tiers=[{medal:"🥇",place:"1st place",n:3,cls:"gold"},{medal:"🥈",place:"2nd place",n:2,cls:""},{medal:"🥉",place:"3rd place",n:1,cls:""}];
+  return `<div class="prizehero"><img src="${PRIZE_IMG}" alt="SWISS Schoki"><div><div class="ph-title">SWISS Schoki 🍫</div><div class="ph-sub">The legendary in-flight chocolate — glory you can actually eat.</div></div></div>
+    ${tiers.map(t=>`<div class="prize ${t.cls}"><div class="pmedal">${t.medal}</div><div class="pinfo"><div class="pplace">${t.place}</div><div class="pwin">${t.n}× SWISS Schoki</div></div><div class="pcount">${"🍫".repeat(t.n)}</div></div>`).join("")}
     <div class="hint" style="text-align:center;margin-top:14px">Predict well. Eat chocolate. Simple. 😋</div>`;
 }
 
 function renderAdmin(){
-  if(!adminOK) return `<div class="panel"><h3>Admin area</h3><div class="field"><label>Password</label><input id="apw" type="password" placeholder="Password"></div><button class="btn" id="alogin">Sign in</button></div>`;
+  if(!adminOK) return `<div class="panel"><h3>Control Tower</h3><div class="field"><label>Access code</label><input id="apw" type="password" placeholder="Tower password"></div><button class="btn" id="alogin">Enter tower</button></div>`;
   const phases=["Group","Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
   const mlist=matches.map(m=>`<div class="adminmatch" data-am="${m.id}">
       <span class="nm">${flagHTML(m.home)} ${esc(m.home)} – ${esc(m.away)} ${flagHTML(m.away)} <span style="color:var(--mut)">(${esc(m.match_date)})</span></span>
@@ -770,10 +658,7 @@ function renderAdmin(){
       setter=`<input type="${q.qtype==="number"?"number":"text"}" data-bc="${q.id}" value="${esc(q.correct??"")}" placeholder="correct answer" style="width:auto;flex:1;min-width:110px;text-align:left">`;
     }
     return `<div class="adminbq" data-aq="${q.id}"><div class="qx">${esc(q.question)} <span class="tag">${q.qtype}</span><span class="tag">${q.points} pts</span></div>
-      <div class="ctrl">${setter}
-        <button class="btn sm ghost" data-block="${q.id}">${q.locked?"🔒":"🔓"}</button>
-        <button class="btn sm ${q.resolved?"ghost":""}" data-bres="${q.id}">${q.resolved?"resolved ✓":"resolve"}</button>
-        <button class="btn ghost sm" data-bdel="${q.id}">✕</button></div></div>`;
+      <div class="ctrl">${setter}<button class="btn sm ghost" data-block="${q.id}">${q.locked?"🔒":"🔓"}</button><button class="btn sm ${q.resolved?"ghost":""}" data-bres="${q.id}">${q.resolved?"resolved ✓":"resolve"}</button><button class="btn ghost sm" data-bdel="${q.id}">✕</button></div></div>`;
   }).join("");
 
   return `
@@ -788,8 +673,8 @@ function renderAdmin(){
       </div><button class="btn" id="addMatch">Add match</button>
       <div class="hint" style="margin-top:8px">Tip: type the country in English or German — flags are detected automatically.</div></div>
 
-    <div class="panel"><h3>Match results & control</h3>${mlist||'<div class="hint">No matches.</div>'}
-      <div class="hint" style="margin-top:12px">🔒 closes predictions before kickoff. "score" counts the match for the leaderboard (enter the result first).</div></div>
+    <div class="panel"><h3>Flight control</h3>${mlist||'<div class="hint">No matches.</div>'}
+      <div class="hint" style="margin-top:12px">Gate closed blocks predictions before kickoff. Mark scored once the official final score is confirmed.</div></div>
 
     <div class="panel"><h3>Add bonus question</h3>
       <div class="field"><label>Question</label><input id="bq" placeholder="e.g. Who will win the World Cup?"></div>
@@ -821,12 +706,10 @@ function bind(){
     if(s)s.onclick=saveTips;
     document.querySelectorAll("[data-rnd]").forEach(btn=>btn.onclick=()=>{tipRound=btn.dataset.rnd;renderView();});
   }
-
   if(tab==="bonus"){
     const s=$("#saveBonus");
     if(s)s.onclick=saveBonus;
   }
-
   if(tab==="admin"&&!adminOK){
     const b=$("#alogin");
     if(b){
@@ -834,7 +717,6 @@ function bind(){
       $("#apw").onkeydown=e=>{if(e.key==="Enter")b.click();};
     }
   }
-
   if(tab==="admin"&&adminOK){
     $("#addMatch").onclick=async()=>{
       const h=$("#nh").value.trim(),a=$("#na").value.trim();
@@ -844,7 +726,6 @@ function bind(){
       if(error){toast("Error");return;}
       await loadAll();toast("Match added");
     };
-
     document.querySelectorAll('[data-fin]').forEach(btn=>btn.onclick=async()=>{
       const id=+btn.dataset.fin,row=btn.closest('[data-am]'),m=matches.find(x=>x.id===id);
       if(!m.finished){
@@ -856,19 +737,16 @@ function bind(){
       }
       await loadAll();
     });
-
     document.querySelectorAll('[data-lock]').forEach(btn=>btn.onclick=async()=>{
       const id=+btn.dataset.lock,m=matches.find(x=>x.id===id);
       await sb.from("matches").update({locked:!m.locked}).eq("id",id);
       await loadAll();
     });
-
     document.querySelectorAll('[data-del]').forEach(btn=>btn.onclick=async()=>{
       if(!confirm("Delete match?"))return;
       await sb.from("matches").delete().eq("id",+btn.dataset.del);
       await loadAll();
     });
-
     const ab=$("#addBonus");
     if(ab)ab.onclick=async()=>{
       const q=$("#bq").value.trim();
@@ -886,7 +764,6 @@ function bind(){
       if(error){toast("Error");return;}
       await loadAll();toast("Bonus question added");
     };
-
     document.querySelectorAll('[data-bres]').forEach(btn=>btn.onclick=async()=>{
       const id=+btn.dataset.bres,q=bonusQs.find(x=>x.id===id),row=btn.closest('[data-aq]');
       if(!q.resolved){
@@ -898,13 +775,11 @@ function bind(){
       }
       await loadAll();
     });
-
     document.querySelectorAll('[data-block]').forEach(btn=>btn.onclick=async()=>{
       const id=+btn.dataset.block,q=bonusQs.find(x=>x.id===id);
       await sb.from("bonus_questions").update({locked:!q.locked}).eq("id",id);
       await loadAll();
     });
-
     document.querySelectorAll('[data-bdel]').forEach(btn=>btn.onclick=async()=>{
       if(!confirm("Delete bonus question?"))return;
       await sb.from("bonus_questions").delete().eq("id",+btn.dataset.bdel);
