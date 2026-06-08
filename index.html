@@ -155,6 +155,7 @@
   .livebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
   .livechip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700;color:var(--mut)}
   .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
+  .cd-chip{display:inline-block;background:#eef1fb;color:var(--accent);border:1px solid #d7ddf5;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.2px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -182,6 +183,7 @@
     <button data-tab="rules">Bordkarte</button>
     <button data-tab="bonus">Upgrades</button>
     <button data-tab="rank">Flight Deck</button>
+    <button data-tab="crew">Crew Lounge</button>
     <button data-tab="prizes">Cargo</button>
     <button data-tab="admin">Control Tower</button>
   </nav>
@@ -232,28 +234,9 @@ function scoreOf(pick,m){ if(!pick||!m||!m.finished||m.home_score==null||m.away_
 function isExactHit(pick,m){ return pick&&m&&m.finished&&+pick.home_tip===+m.home_score&&+pick.away_tip===+m.away_score; }
 function maxPts(m){ const S=(m.phase==="Group")?SCORE.group:SCORE.knockout; return S.exact; }
 function isClosed(m){ if(m.finished||m.locked) return true; if(m.kickoff){ const k=new Date(m.kickoff).getTime(); if(!isNaN(k)&&Date.now()>=k-5*60*1000) return true; } return false; }
-function getCountdownHtml(m) {
-  // Zeigt nichts an, wenn das Spiel schon vorbei ist, läuft oder kein Anstossdatum hat.
-  if (m.finished || !m.kickoff || new Date(m.kickoff).getTime() < Date.now()) {
-    return "";
-  }
-  const ms = new Date(m.kickoff).getTime() - Date.now();
-  if (isNaN(ms)) return "";
-
-  const totalMinutes = Math.floor(ms / 60000);
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-  const minutes = totalMinutes % 60;
-
-  let countdownStr = 'Kickoff in: ';
-  if (days > 0) countdownStr += `${days}d, `;
-  if (hours > 0 || days > 0) countdownStr += `${hours}h, `;
-  countdownStr += `${minutes}m`;
-  
-  // Style für den Countdown-Text
-  return `<span style="font-size:11px; font-weight:700; color:var(--accent);">${countdownStr}</span>`;
-}
-
+function cdText(m){ if(m.finished||!m.kickoff) return null; const ms=new Date(m.kickoff).getTime()-Date.now(); if(isNaN(ms)||ms<0) return null; const tot=Math.floor(ms/60000); const d=Math.floor(tot/1440), h=Math.floor((tot%1440)/60), mi=tot%60; let s=""; if(d>0)s+=d+"d "; if(d>0||h>0)s+=h+"h "; s+=mi+"m"; return "🛫 Departs in "+s; }
+function getCountdownHtml(m){ const t=cdText(m); return t?`<span class="cd-chip" data-cd="${m.id}">${t}</span>`:""; }
+function tickCountdowns(){ document.querySelectorAll("[data-cd]").forEach(el=>{ const m=matches.find(x=>x.id===+el.dataset.cd); if(!m){el.style.display="none";return;} const t=cdText(m); if(t){el.textContent=t;el.style.display="";} else el.style.display="none"; }); }
 function statusBanner(m){ if(m.finished) return `<div class="hint" style="margin:8px 0 0">✅ Final score confirmed</div>`; if(!m.kickoff) return ""; const ms=new Date(m.kickoff).getTime()-Date.now(); if(isNaN(ms)) return ""; const min=Math.floor(ms/60000); if(min<0) return `<div class="hint" style="margin:8px 0 0;color:#b45309;font-weight:700">🛑 Gate closed</div>`; if(min<=15) return `<div class="hint" style="margin:8px 0 0;color:#b45309;font-weight:700">⏳ Gate closes in ${min} min</div>`; if(min<=60) return `<div class="hint" style="margin:8px 0 0;color:var(--accent);font-weight:700">🛫 Boarding soon</div>`; return ""; }
 function myPick(id){ return tips.find(x=>x.player===me&&x.match_id===id); }
 function bonusEarned(q,player){ if(!q.resolved||q.correct==null||q.correct==="") return null; const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===player); if(!a) return 0; if(q.qtype==="number"){ const target=parseFloat(q.correct); const diffs=bonusAnswers.filter(x=>x.question_id===q.id).map(x=>{const n=parseFloat(x.answer);return isNaN(n)?Infinity:Math.abs(n-target);}); const best=Math.min(...diffs); const mine=parseFloat(a.answer), myd=isNaN(mine)?Infinity:Math.abs(mine-target); return (myd===best&&best!==Infinity)?q.points:0; } return (String(a.answer).trim().toLowerCase()===String(q.correct).trim().toLowerCase())?q.points:0; }
@@ -267,16 +250,7 @@ function totals(){ const players=new Set(); tips.forEach(t=>players.add(t.player
 function renderMe(){ const bar=$("#meBar"); if(!me){ bar.innerHTML=`<label>Who are you?</label><div class="row"><input id="nameIn" type="text" placeholder="Your name" maxlength="24"><button class="btn" id="setName">Join</button></div><div class="hint" style="margin:8px 0 0">Your name puts you on the Flight Deck. Spell it the same way every time. 😉</div>`; $("#setName").onclick=()=>{ const v=$("#nameIn").value.trim().replace(/\s+/g," "); if(!v)return; me=v; try{ localStorage.setItem("wm_me",me); }catch(e){} renderMe(); renderView(); }; $("#nameIn").onkeydown=e=>{if(e.key==="Enter")$("#setName").click();}; }else{ bar.innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><div class="who">Playing as <b>${esc(me)}</b></div><button class="btn ghost sm" id="logout">switch</button></div>`; $("#logout").onclick=()=>{ me=""; try{ localStorage.removeItem("wm_me"); }catch(e){} renderMe(); renderView(); }; } }
 function allPicksHTML(matchId,rHome,rAway,finished){ const mt=tips.filter(t=>t.match_id===matchId); if(!mt.length) return '<div class="all-picks"><span style="font-size:12px;color:var(--mut)">No picks yet</span></div>'; const chips=mt.map(t=>{ const isMe=t.player===me; let cls="pick-chip"; if(finished&&rHome!=null){ const exact=+t.home_tip===+rHome&&+t.away_tip===+rAway; const good=!exact&&Math.sign(+t.home_tip-+t.away_tip)===Math.sign(+rHome-+rAway); if(exact) cls+=" exact"; else if(good) cls+=" good"; } if(isMe) cls+=" me"; return `<span class="${cls}">${esc(t.player)} ${t.home_tip}:${t.away_tip}</span>`; }).join(""); return `<div class="all-picks">${chips}</div>`; }
 function toggleReveal(id,btn){ const el=document.getElementById('rev-'+id); if(!el) return; const hidden=el.style.display==="none"; el.style.display=hidden?"block":"none"; btn.textContent=hidden?"👀 Hide picks":"👀 Show all picks"; }
-function matchCard(m){ const pick=myPick(m.id)||{}; const closed=isClosed(m); const head = `
-  <div class="meta">
-    <span class="grp">${m.phase === "Group" ? ("Group " + (m.grp || "")) : esc(m.phase)}</span>
-    <span>
-      ${getCountdownHtml(m)}
-      <div style="font-size:11px; text-align:right; margin-top:${getCountdownHtml(m) ? '4px' : '0'};">
-        ${esc(m.match_date)} · ${esc(m.match_time)}${closed && !m.finished ? " · 🛑 Gate closed" : ""}
-      </div>
-    </span>
-  </div>`; if(m.finished){ const s=scoreOf(pick,m),has=pick.home_tip!=null; return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`; } const dis=closed?"disabled":""; const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:""; return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}${revealSection}</div>`; }
+function matchCard(m){ const pick=myPick(m.id)||{}; const closed=isClosed(m); const cd=getCountdownHtml(m); const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`; if(m.finished){ const s=scoreOf(pick,m),has=pick.home_tip!=null; return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`; } const dis=closed?"disabled":""; const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:""; return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}${revealSection}</div>`; }
 function nextKickoff(){ const future=matches.filter(m=>m.kickoff && !m.finished).map(m=>({m,t:new Date(m.kickoff).getTime()})).filter(x=>!isNaN(x.t)&&x.t>Date.now()).sort((a,b)=>a.t-b.t); if(!future.length) return null; return future[0]; }
 function fmtCountdown(ms){ if(ms<0) ms=0; const totalMin=Math.floor(ms/60000); const d=Math.floor(totalMin/1440); const h=Math.floor((totalMin%1440)/60); const mi=totalMin%60; if(d>0) return `${d}d ${h}h`; if(h>0) return `${h}h ${String(mi).padStart(2,"0")}m`; return `${mi}m`; }
 function countdownLine(){ const nk=nextKickoff(); if(!nk) return ""; const diff=nk.t-Date.now(); const h=Math.floor(diff/3600000); const mm=Math.floor((diff%3600000)/60000); const hh=String(h).padStart(2,"0"); const mi=String(mm).padStart(2,"0"); return `<div class="livebar"><span class="livechip"><span class="dot"></span>Nächster Abflug in ${hh}:${mi} h</span></div>`; }
@@ -298,6 +272,42 @@ function renderBonus(){
 async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
 function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player">${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</td><td class="stat num">${p.exact}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Correct exact scores">🎯 Hits</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function renderCrew(){
+  const players=[...new Set([...tips.map(t=>t.player),...bonusAnswers.map(a=>a.player)])];
+  const card=(medal,title,winner,sub)=>`<div class="prize"><div class="pmedal">${medal}</div><div class="pinfo"><div class="pplace">${title}</div><div class="pwin">${winner?esc(winner):"—"}${sub?` · ${esc(sub)}`:""}</div></div></div>`;
+  if(!players.length) return `<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks. They appear as soon as the crew starts boarding — no predictions in yet.</div></div>`;
+
+  // 🏆 Crowd Favourite — most-tipped World Cup winner
+  const winQ=bonusQs.find(q=>/win the world cup/i.test(q.question))||bonusQs.find(q=>q.sort_order===1);
+  let crowd=null;
+  if(winQ){ const c={}; bonusAnswers.filter(a=>a.question_id===winQ.id).forEach(a=>{const k=(a.answer||"").trim(); if(k)c[k]=(c[k]||0)+1;}); const top=Object.entries(c).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0]))[0]; const tot=Object.values(c).reduce((s,v)=>s+v,0); if(top) crowd={team:top[0],n:top[1],tot}; }
+
+  // 🇨🇭 Flag Carrier — backs Switzerland the most (summed predicted CH margin)
+  const FLAG="Switzerland";
+  const chM=matches.filter(m=>m.home===FLAG||m.away===FLAG);
+  let flag=null;
+  players.forEach(name=>{ let margin=0,cnt=0; chM.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); if(t&&t.home_tip!=null){ margin+=(m.home===FLAG)?(+t.home_tip-+t.away_tip):(+t.away_tip-+t.home_tip); cnt++; } }); if(cnt>0&&(!flag||margin>flag.margin)) flag={name,margin,cnt}; });
+
+  // 🌪️ Turbulence Seeker — highest average total goals per pick
+  let turb=null;
+  players.forEach(name=>{ const ps=tips.filter(t=>t.player===name&&t.home_tip!=null); if(ps.length){ const avg=ps.reduce((s,t)=>s+(+t.home_tip+ +t.away_tip),0)/ps.length; if(!turb||avg>turb.avg) turb={name,avg,n:ps.length}; } });
+
+  // 🛩️ Autopilot — longest streak of point-scoring tips (chronological, finished matches)
+  const fin=matches.filter(m=>m.finished).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  let auto=null;
+  players.forEach(name=>{ let cur=0,best=0; fin.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(t,m); if(s!=null&&s>0){cur++;best=Math.max(best,cur);}else{cur=0;} }); if(best>0&&(!auto||best>auto.best)) auto={name,best}; });
+
+  // 🧑‍✈️ Captain — current leader
+  const t=totals(); const cap=(t.length&&(matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved)))?t[0]:null;
+
+  let html=`<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks — just for bragging rights. They fill in as more predictions and results come in.</div></div>`;
+  html+=card("🧑‍✈️","Captain (current #1)", cap?cap.name:null, cap?`${cap.pts} pts`:"no scores yet");
+  html+=card("🏆","Crowd Favourite", crowd?crowd.team:null, crowd?`backed by ${crowd.n}/${crowd.tot}`:"no winner picks yet");
+  html+=card("🇨🇭","Flag Carrier", flag?flag.name:null, flag?`Switzerland by ${flag.margin>0?"+":""}${flag.margin} goals over ${flag.cnt} game${flag.cnt===1?"":"s"}`:"no Swiss picks yet");
+  html+=card("🌪️","Turbulence Seeker", turb?turb.name:null, turb?`${turb.avg.toFixed(1)} goals/match on average`:"no picks yet");
+  html+=card("🛩️","Autopilot (longest hot streak)", auto?auto.name:null, auto?`${auto.best} scoring tips in a row`:"fills once matches are scored");
+  return html;
+}
 function renderRules(){ const g=SCORE.group,k=SCORE.knockout; return `<div class="rcard"><h3>How it works ✈️</h3><div class="lead">Two deadlines — don't mix them up:</div><div class="rrow"><span class="pp">✈️</span><span><b>Upgrades</b> (bonus questions): answer them <b>all once, before the very first match</b> of the tournament kicks off. After that they lock for good.</span></div><div class="rrow"><span class="pp">🛫</span><span><b>Departures</b> (match scores): predicted <b>one match at a time</b> — each game locks <b>5 min before its own kickoff</b>, so keep coming back all tournament long.</span></div><div class="rrow"><span class="pp">🍫</span><span>Points stack up on the <b>Flight Deck</b>; the top 3 win SWISS Schoki (see <b>Cargo</b>).</span></div></div><div class="rcard"><h3>Good to know 👍</h3><div class="lead">A few details that win — or cost — you points.</div><div class="rrow"><span class="pp">🥅</span><span>For knockout games, predict the score <b>after 120 minutes</b> (extra time counts, penalty-shootout goals do <b>not</b>). A 1:1 thriller that goes to penalties is scored as 1:1.</span></div><div class="rrow"><span class="pp">🧑</span><span>Enter your name to play — and spell it the same way every time. "Beat", "beat" and "BEAT the Legend" are three different humans to the Flight Deck.</span></div></div><div class="rcard"><h3>Points · Group stage</h3><div class="lead">Only the single best tier counts — no stacking. First the outcome (home win / draw / away win) must be right, otherwise 0.</div><div class="rrow"><span class="pp">${g.exact} pts</span><span>🎯 <b>Exact score.</b></span></div><div class="rrow"><span class="pp">${g.diff} pts</span><span>➖ Right winner <b>and</b> right goal difference — e.g. you tip 3:2 and it ends 2:1. <b>Draw:</b> a draw one goal off (0:0 or 2:2 for a 1:1).</span></div><div class="rrow"><span class="pp">${g.tendency} pts</span><span>✅ Right winner only, wrong margin. <b>Draw:</b> a draw further off (3:3 for a 1:1).</span></div><div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Group"})} points.</div></div><div class="rcard"><h3>Points · Knockout stage</h3><div class="lead">Same idea, double the drama — every tier is worth twice as much (scored after 120').</div><div class="rrow ko"><span class="pp">${k.exact} pts</span><span>🎯 Exact score.</span></div><div class="rrow ko"><span class="pp">${k.diff} pts</span><span>➖ Right winner + right goal difference (draw: one goal off).</span></div><div class="rrow ko"><span class="pp">${k.tendency} pts</span><span>✅ Right winner only (draw: further off).</span></div><div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Knockout"})} points.</div></div></div>`; }
 function renderPrizes(){
   return `<div class="prizehero"><img src="prize-schoki.jpg" alt="SWISS Schoki"><div><div class="ph-title">Cargo Manifest</div><div class="ph-sub">The legendary in-flight chocolate — glory you can actually eat.</div></div></div>
@@ -356,11 +366,16 @@ function renderAdmin(){
     <div class="panel"><h3>Scoring (summary)</h3><div class="rules">
       Best tier only — Group: exact <b>${SCORE.group.exact}</b> · right difference <b>${SCORE.group.diff}</b> · right winner <b>${SCORE.group.tendency}</b>.<br>
       Knockout (doubled): exact <b>${SCORE.knockout.exact}</b> · right difference <b>${SCORE.knockout.diff}</b> · right winner <b>${SCORE.knockout.tendency}</b>.<br>
-      Full rules are on the <b>Bordkarte</b> tab.</div></div>`;
+      Full rules are on the <b>Bordkarte</b> tab.</div></div>
+
+    <div class="panel"><h3>Flight Manifest (export standings)</h3>
+      <div class="rules" style="margin-bottom:10px">Generate the current Flight Deck as CSV — copy it or download for the records.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="genManifest">Generate</button><button class="btn ghost" id="dlManifest">Download .csv</button></div>
+      <textarea id="manifestOut" readonly placeholder="Press Generate…" style="width:100%;margin-top:10px;min-height:120px;border:1px solid var(--line);border-radius:9px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px"></textarea></div>`;
 }
 function renderView(){
   const view=$("#view");
-  const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,prizes:renderPrizes,rules:renderRules,admin:renderAdmin};
+  const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,crew:renderCrew,prizes:renderPrizes,rules:renderRules,admin:renderAdmin};
   view.innerHTML=tabMap[tab]();
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderView();});
@@ -456,11 +471,15 @@ function renderView(){
       await sb.from("bonus_questions").delete().eq("id",+btn.dataset.bdel);
       await loadAll();
     });
+    const buildManifest=()=>{ const t=totals(); const lines=["Rank,Player,Hits,Bonus,Total"]; t.forEach((p,i)=>lines.push(`${i+1},"${String(p.name).replace(/"/g,'""')}",${p.exact},${p.bonus},${p.pts}`)); return lines.join("\n"); };
+    const gm=document.getElementById("genManifest");
+    if(gm) gm.onclick=()=>{ const out=document.getElementById("manifestOut"); out.value=buildManifest(); toast("Manifest generated"); };
+    const dm=document.getElementById("dlManifest");
+    if(dm) dm.onclick=()=>{ const csv=buildManifest(); const blob=new Blob([csv],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`opsd-flight-deck-${todayKey()}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); };
   }
 }
 loadAll();
-setInterval(renderView, 60000);
-
+setInterval(tickCountdowns, 30000);
 </script>
 </body>
 </html>
