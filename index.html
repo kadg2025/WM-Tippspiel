@@ -271,8 +271,155 @@ function renderPrizes(){
   <div class="prize"><div class="pmedal">🥈</div><div class="pinfo"><div class="pplace">2nd place</div><div class="pwin">2× SWISS Schoki</div></div><div class="pcount">🍫🍫</div></div>
   <div class="prize"><div class="pmedal">🥉</div><div class="pinfo"><div class="pplace">3rd place</div><div class="pwin">1× SWISS Schoki</div></div><div class="pcount">🍫</div></div>`;
 }
-function renderAdmin(){ return `<div class="panel"><h3>Control Tower</h3><div class="rules">Admin area stays unchanged in this replace-code version. Keep your current admin rendering here or paste in your original admin block if you need editing forms.</div></div>`; }
-function renderView(){ const view=$("#view"); const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,prizes:renderPrizes,rules:renderRules,admin:renderAdmin}; view.innerHTML=tabMap[tab](); document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab)); const saveTipsBtn=document.getElementById("saveTips"); if(saveTipsBtn) saveTipsBtn.onclick=saveTips; const saveBonusBtn=document.getElementById("saveBonus"); if(saveBonusBtn) saveBonusBtn.onclick=saveBonus; document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderView();}); }
+function renderAdmin(){
+  if(!adminOK) return `<div class="panel"><h3>Control Tower</h3><div class="field"><label>Access code</label><input id="apw" type="password" placeholder="Tower password"></div><button class="btn" id="alogin">Enter tower</button></div>`;
+  const phases=["Group","Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
+  const mlist=matches.map(m=>`<div class="adminmatch" data-am="${m.id}">
+      <span class="nm">${flagHTML(m.home)} ${esc(m.home)} – ${esc(m.away)} ${flagHTML(m.away)} <span style="color:var(--mut)">(${esc(m.match_date)})</span></span>
+      <input type="number" min="0" data-side="hs" value="${m.home_score??""}" placeholder="–"><span style="color:var(--mut)">:</span><input type="number" min="0" data-side="as" value="${m.away_score??""}" placeholder="–">
+      <button class="btn sm ghost" data-lock="${m.id}">${m.locked?"🔒":"🔓"}</button>
+      <button class="btn sm ${m.finished?"ghost":""}" data-fin="${m.id}">${m.finished?"scored ✓":"score"}</button>
+      <button class="btn ghost sm" data-del="${m.id}">✕</button></div>`).join("");
+  const bqlist=bonusQs.map(q=>{
+    let setter;
+    if(q.qtype==="choice"){
+      const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})();
+      setter=`<select data-bc="${q.id}"><option value="">– correct –</option>${opts.map(o=>`<option ${q.correct===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+    } else {
+      setter=`<input type="${q.qtype==="number"?"number":"text"}" data-bc="${q.id}" value="${esc(q.correct??"")}" placeholder="correct answer" style="width:auto;flex:1;min-width:110px;text-align:left">`;
+    }
+    return `<div class="adminbq" data-aq="${q.id}"><div class="qx">${esc(q.question)} <span class="tag">${q.qtype}</span><span class="tag">${q.points} pts</span></div>
+      <div class="ctrl">${setter}<button class="btn sm ghost" data-block="${q.id}">${q.locked?"🔒":"🔓"}</button><button class="btn sm ${q.resolved?"ghost":""}" data-bres="${q.id}">${q.resolved?"resolved ✓":"resolve"}</button><button class="btn ghost sm" data-bdel="${q.id}">✕</button></div></div>`;
+  }).join("");
+  return `
+    <div class="panel"><h3>Add match</h3>
+      <div class="grid2">
+        <div class="field"><label>Home</label><input id="nh" placeholder="e.g. Switzerland"></div>
+        <div class="field"><label>Away</label><input id="na" placeholder="e.g. Qatar"></div>
+        <div class="field"><label>Date</label><input id="nd" placeholder="Sat 13 Jun"></div>
+        <div class="field"><label>Time</label><input id="nt" placeholder="21:00"></div>
+        <div class="field"><label>Phase</label><select id="np">${phases.map(p=>`<option>${p}</option>`).join("")}</select></div>
+        <div class="field"><label>Group (group stage only)</label><input id="ng" placeholder="A" maxlength="2"></div>
+      </div><button class="btn" id="addMatch">Add match</button>
+      <div class="hint" style="margin-top:8px">Tip: type the country in English or German — flags are detected automatically.</div></div>
+
+    <div class="panel"><h3>Flight control</h3>${mlist||'<div class="hint">No matches.</div>'}
+      <div class="hint" style="margin-top:12px">Gate closed blocks predictions before kickoff. Mark scored once the official final score is confirmed.</div></div>
+
+    <div class="panel"><h3>Add bonus question</h3>
+      <div class="field"><label>Question</label><input id="bq" placeholder="e.g. Who will win the World Cup?"></div>
+      <div class="grid2">
+        <div class="field"><label>Type</label><select id="bt"><option value="text">Free text</option><option value="number">Number (closest wins)</option><option value="choice">Multiple choice</option></select></div>
+        <div class="field"><label>Points</label><input id="bp" type="number" value="5"></div>
+      </div>
+      <div class="field"><label>Options (choice only, comma-separated)</label><input id="bo" placeholder="Yes, No"></div>
+      <button class="btn" id="addBonus">Add bonus question</button>
+      <div class="hint" style="margin-top:8px">Enter the correct answer below once it's known, then hit "resolve" to award points.</div></div>
+
+    <div class="panel"><h3>Bonus questions</h3>${bqlist||'<div class="hint">No bonus questions yet.</div>'}</div>
+
+    <div class="panel"><h3>Scoring (summary)</h3><div class="rules">
+      Group stage (points add up): <b>${SCORE.group.tendency}</b> outcome · <b>${SCORE.group.home}</b> home goals · <b>${SCORE.group.away}</b> away goals · <b>${SCORE.group.diff}</b> goal diff (max ${maxPts({phase:"Group"})}).<br>
+      Knockout: <b>${SCORE.knockout.tendency}</b> / <b>${SCORE.knockout.home}</b> / <b>${SCORE.knockout.away}</b> / <b>${SCORE.knockout.diff}</b> (max ${maxPts({phase:"Final"})}).<br>
+      Full rules are on the <b>Bordkarte</b> tab.</div></div>`;
+}
+function renderView(){
+  const view=$("#view");
+  const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,prizes:renderPrizes,rules:renderRules,admin:renderAdmin};
+  view.innerHTML=tabMap[tab]();
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderView();});
+
+  // Departures: save + round switcher
+  const saveTipsBtn=document.getElementById("saveTips");
+  if(saveTipsBtn) saveTipsBtn.onclick=saveTips;
+  document.querySelectorAll("[data-rnd]").forEach(btn=>btn.onclick=()=>{tipRound=btn.dataset.rnd;renderView();});
+
+  // Upgrades: save
+  const saveBonusBtn=document.getElementById("saveBonus");
+  if(saveBonusBtn) saveBonusBtn.onclick=saveBonus;
+
+  // Control Tower: login
+  if(tab==="admin"&&!adminOK){
+    const b=document.getElementById("alogin");
+    if(b){
+      b.onclick=()=>{ if(document.getElementById("apw").value===ADMIN_PW){adminOK=true;renderView();} else toast("Wrong password"); };
+      document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
+    }
+  }
+
+  // Control Tower: admin actions
+  if(tab==="admin"&&adminOK){
+    const addM=document.getElementById("addMatch");
+    if(addM) addM.onclick=async()=>{
+      const h=document.getElementById("nh").value.trim(), a=document.getElementById("na").value.trim();
+      if(!h||!a){toast("Enter home and away");return;}
+      const order=(matches.reduce((mx,x)=>Math.max(mx,x.sort_order||0),0))+1;
+      const {error}=await sb.from("matches").insert([{phase:document.getElementById("np").value,grp:document.getElementById("ng").value.trim()||null,match_date:document.getElementById("nd").value.trim()||"TBD",match_time:document.getElementById("nt").value.trim()||"—",home:h,away:a,sort_order:order}]);
+      if(error){toast("Error");return;}
+      await loadAll();toast("Match added");
+    };
+    document.querySelectorAll('[data-fin]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.fin, row=btn.closest('[data-am]'), m=matches.find(x=>x.id===id);
+      if(!m.finished){
+        const hs=row.querySelector('[data-side=hs]').value, as=row.querySelector('[data-side=as]').value;
+        if(hs===""||as===""){toast("Enter the result");return;}
+        await sb.from("matches").update({home_score:+hs,away_score:+as,finished:true,locked:true}).eq("id",id);
+      } else {
+        await sb.from("matches").update({finished:false}).eq("id",id);
+      }
+      await loadAll();
+    });
+    document.querySelectorAll('[data-lock]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.lock, m=matches.find(x=>x.id===id);
+      await sb.from("matches").update({locked:!m.locked}).eq("id",id);
+      await loadAll();
+    });
+    document.querySelectorAll('[data-del]').forEach(btn=>btn.onclick=async()=>{
+      if(!confirm("Delete match?"))return;
+      await sb.from("matches").delete().eq("id",+btn.dataset.del);
+      await loadAll();
+    });
+    const ab=document.getElementById("addBonus");
+    if(ab) ab.onclick=async()=>{
+      const q=document.getElementById("bq").value.trim();
+      if(!q){toast("Enter a question");return;}
+      const type=document.getElementById("bt").value;
+      const pts=+document.getElementById("bp").value||5;
+      let options=null;
+      if(type==="choice"){
+        const arr=document.getElementById("bo").value.split(",").map(s=>s.trim()).filter(Boolean);
+        if(arr.length<2){toast("Choice needs ≥2 options");return;}
+        options=JSON.stringify(arr);
+      }
+      const order=(bonusQs.reduce((mx,x)=>Math.max(mx,x.sort_order||0),0))+1;
+      const {error}=await sb.from("bonus_questions").insert([{question:q,qtype:type,options,points:pts,sort_order:order}]);
+      if(error){toast("Error");return;}
+      await loadAll();toast("Bonus question added");
+    };
+    document.querySelectorAll('[data-bres]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.bres, q=bonusQs.find(x=>x.id===id), row=btn.closest('[data-aq]');
+      if(!q.resolved){
+        const v=String(row.querySelector('[data-bc]').value).trim();
+        if(v===""){toast("Enter the correct answer");return;}
+        await sb.from("bonus_questions").update({correct:v,resolved:true,locked:true}).eq("id",id);
+      } else {
+        await sb.from("bonus_questions").update({resolved:false}).eq("id",id);
+      }
+      await loadAll();
+    });
+    document.querySelectorAll('[data-block]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.block, q=bonusQs.find(x=>x.id===id);
+      await sb.from("bonus_questions").update({locked:!q.locked}).eq("id",id);
+      await loadAll();
+    });
+    document.querySelectorAll('[data-bdel]').forEach(btn=>btn.onclick=async()=>{
+      if(!confirm("Delete bonus question?"))return;
+      await sb.from("bonus_questions").delete().eq("id",+btn.dataset.bdel);
+      await loadAll();
+    });
+  }
+}
 loadAll();
 </script>
 </body>
