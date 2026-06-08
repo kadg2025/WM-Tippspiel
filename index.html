@@ -217,22 +217,32 @@ const ISO={
   "Iraq":"iq","Irak":"iq","UAE":"ae","United Arab Emirates":"ae"
 };
 function flagHTML(team){ const code=ISO[(team||"").trim()]; if(code) return `<img class="flag" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="" loading="lazy">`; return `<span class="flag-emoji">🌍</span>`; }
-const TAIL_FILL={LX:"#d52b1e",LH:"#05164d",EW:"#8a1f3d",OS:"#c8102e",SN:"#e4e4e4",AZ:"#002b5c",WK:"#e2001a",DEV:"#1f2430",NEUTRAL:"#b9c0cb"};
-const TAIL_MOTIF={
- LX:'<rect x="15.4" y="11" width="2" height="7" fill="#fff"/><rect x="13" y="13.5" width="6.8" height="2" fill="#fff"/>',
- LH:'<circle cx="17" cy="15" r="3.1" fill="none" stroke="#f0b419" stroke-width="1.5"/>',
- EW:'<rect x="13.2" y="8" width="2.3" height="15" fill="#fff" transform="rotate(16 15 15)"/>',
- OS:'<path d="M12.5 18 L17 13 L21.5 18" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>',
- SN:'<circle cx="14.5" cy="12" r="1.3" fill="#d52b1e"/><circle cx="18" cy="14" r="1.3" fill="#d52b1e"/><circle cx="15.5" cy="17" r="1.3" fill="#d52b1e"/>',
- AZ:'<rect x="13.6" y="10" width="1.7" height="9" fill="#008c45"/><rect x="15.3" y="10" width="1.7" height="9" fill="#fff"/><rect x="17" y="10" width="1.7" height="9" fill="#cd212a"/>',
- WK:'<circle cx="16.5" cy="14.5" r="3" fill="#fff"/><circle cx="16.5" cy="14.5" r="1" fill="#e2001a"/>',
- DEV:'<text x="16" y="18" font-size="8" font-family="monospace" font-weight="700" fill="#5eead4" text-anchor="middle">&lt;/&gt;</text>',
- NEUTRAL:'<rect x="10" y="14.5" width="12" height="1.8" fill="#fff" opacity=".85"/>'
+
+// --- SVG TAIL LIBRARY (START) ---
+const TAIL_SVGS = {
+  LX:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#D81E05"/><rect x="13.5" y="11" width="5" height="10" fill="white" rx="1"/><rect x="11" y="13.5" width="10" height="5" fill="white" rx="1"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.1"/></svg>',
+  LH:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#002F6C"/><circle cx="16" cy="16" r="6" stroke="#FFC72C" stroke-width="1.2" fill="none"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.2"/></svg>',
+  EW:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#80003F"/><path d="M4,30 C10,25 18,20 23,18 L21,30 Z" fill="#00A1DE" opacity="0.8"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.15"/></svg>',
+  OS:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#E30613"/><polygon points="2,20 25,14 25,20 2,26" fill="white"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.1"/></svg>',
+  SN:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#072E5B"/><circle cx="12" cy="18" r="1.5" fill="#E30613"/><circle cx="16" cy="15" r="1.8" fill="#E30613"/><circle cx="20" cy="12" r="1.5" fill="#E30613"/><circle cx="15" cy="20" r="1.2" fill="#E30613"/><circle cx="19" cy="17" r="1.5" fill="#E30613"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.2"/></svg>',
+  AZ:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#0F2D59"/><path d="M19,4 L23,4 L21,30 L17,30 Z" fill="#CD212A"/><path d="M19.5,4 L21,4 L19.5,30 L18,30 Z" fill="white"/><path d="M19,4 L20,4 L18.5,30 L17.5,30 Z" fill="#008C45"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.2"/></svg>',
+  WK:      '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#E30613"/><g transform="translate(-1,2) scale(0.9)"><ellipse cx="16" cy="16" rx="4" ry="1.5" transform="rotate(30, 16, 16)" fill="white"/><ellipse cx="16" cy="16" rx="4" ry="1.5" transform="rotate(90, 16, 16)" fill="white"/><ellipse cx="16" cy="16" rx="4" ry="1.5" transform="rotate(150, 16, 16)" fill="white"/><circle cx="16" cy="16" r="1.2" fill="#FFCC00"/></g><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.1"/></svg>',
+  DEV:     '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#1F2937"/><path d="M10,14 L7,17 L10,20" stroke="#10B981" stroke-width="1.5" fill="none"/><path d="M13,21 L15,13" stroke="#10B981" stroke-width="1.5" fill="none"/><path d="M18,14 L21,17 L18,20" stroke="#10B981" stroke-width="1.5" fill="none"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.2"/></svg>',
+  NEUTRAL: '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="#D1D5DB"/><path d="M4,30 L19,4 C20,2 22,2 23,4 L21,30 Z" fill="black" opacity="0.15"/></svg>'
 };
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",DEV:"Dev </>"};
 const TAIL_ORDER=["NEUTRAL","LX","LH","EW","OS","SN","AZ","WK","DEV"];
-function tailSVG(code,size){ size=size||22; const fill=TAIL_FILL[code]||TAIL_FILL.NEUTRAL; const motif=TAIL_MOTIF[code]||""; return `<svg width="${size}" height="${size}" viewBox="0 0 28 28" aria-hidden="true" style="vertical-align:middle;flex:0 0 auto"><path d="M7 25 L17 5 Q19 2 22 5 L23 25 Z" fill="${fill}" stroke="rgba(0,0,0,.15)" stroke-width="0.6"/>${motif}</svg>`; }
-function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_FILL[p.tail])?p.tail:"NEUTRAL"; }
+
+function tailSVG(code, size) {
+  size = size || 22;
+  const svgString = TAIL_SVGS[code] || TAIL_SVGS.NEUTRAL;
+  // Use a simple wrapper to easily set size and other attributes
+  return `<span style="width:${size}px; height:${size}px; display:inline-block; vertical-align:middle; flex:0 0 auto;">${svgString}</span>`;
+}
+
+function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_SVGS[p.tail])?p.tail:"NEUTRAL"; }
+// --- SVG TAIL LIBRARY (END) ---
+
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
@@ -287,11 +297,11 @@ function renderBonus(){
 }
 async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
-function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailSVG(tailOf(pl.name),18)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailSVG(tailOf(p.name),20)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Correct exact scores">🎯 Hits</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname" style="display:flex; align-items:center; justify-content:center; gap:6px;">${tailSVG(tailOf(pl.name),18)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailSVG(tailOf(p.name),20)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Correct exact scores">🎯 Hits</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
 function renderCrew(){
-  const players=[...new Set([...tips.map(t=>t.player),...bonusAnswers.map(a=>a.player)])];
+  const allKnownPlayers=[...new Set([...tips.map(t=>t.player),...bonusAnswers.map(a=>a.player),...players.map(p=>p.name)])].filter(Boolean);
   const card=(medal,title,winner,sub,tailCode)=>`<div class="prize"><div class="pmedal">${medal}</div><div class="pinfo"><div class="pplace">${esc(title)}</div><div class="pwin" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${winner&&tailCode?tailSVG(tailCode,18):""}<span>${winner?esc(winner):"—"}${sub?` · ${esc(sub)}`:""}</span></div></div></div>`;
-  if(!players.length) return `<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks. They appear as soon as the crew starts boarding — no predictions in yet.</div></div>`;
+  if(!allKnownPlayers.length) return `<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks. They appear as soon as the crew starts boarding — no predictions in yet.</div></div>`;
 
   // 🏆 Crowd Favourite — most-tipped World Cup winner
   const winQ=bonusQs.find(q=>/win the world cup/i.test(q.question))||bonusQs.find(q=>q.sort_order===1);
@@ -302,16 +312,16 @@ function renderCrew(){
   const FLAG="Switzerland";
   const chM=matches.filter(m=>m.home===FLAG||m.away===FLAG);
   let flag=null;
-  players.forEach(name=>{ let margin=0,cnt=0; chM.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); if(t&&t.home_tip!=null){ margin+=(m.home===FLAG)?(+t.home_tip-+t.away_tip):(+t.away_tip-+t.home_tip); cnt++; } }); if(cnt>0&&(!flag||margin>flag.margin)) flag={name,margin,cnt}; });
+  allKnownPlayers.forEach(name=>{ let margin=0,cnt=0; chM.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); if(t&&t.home_tip!=null){ margin+=(m.home===FLAG)?(+t.home_tip-+t.away_tip):(+t.away_tip-+t.home_tip); cnt++; } }); if(cnt>0&&(!flag||margin>flag.margin)) flag={name,margin,cnt}; });
 
   // 🌪️ Turbulence Seeker — highest average total goals per pick
   let turb=null;
-  players.forEach(name=>{ const ps=tips.filter(t=>t.player===name&&t.home_tip!=null); if(ps.length){ const avg=ps.reduce((s,t)=>s+(+t.home_tip+ +t.away_tip),0)/ps.length; if(!turb||avg>turb.avg) turb={name,avg,n:ps.length}; } });
+  allKnownPlayers.forEach(name=>{ const ps=tips.filter(t=>t.player===name&&t.home_tip!=null); if(ps.length){ const avg=ps.reduce((s,t)=>s+(+t.home_tip+ +t.away_tip),0)/ps.length; if(!turb||avg>turb.avg) turb={name,avg,n:ps.length}; } });
 
   // 🛩️ Autopilot — longest streak of point-scoring tips (chronological, finished matches)
   const fin=matches.filter(m=>m.finished).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   let auto=null;
-  players.forEach(name=>{ let cur=0,best=0; fin.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(t,m); if(s!=null&&s>0){cur++;best=Math.max(best,cur);}else{cur=0;} }); if(best>0&&(!auto||best>auto.best)) auto={name,best}; });
+  allKnownPlayers.forEach(name=>{ let cur=0,best=0; fin.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(t,m); if(s!=null&&s>0){cur++;best=Math.max(best,cur);}else{cur=0;} }); if(best>0&&(!auto||best>auto.best)) auto={name,best}; });
 
   // 🧑‍✈️ Captain — current leader
   const t=totals(); const cap=(t.length&&(matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved)))?t[0]:null;
