@@ -160,9 +160,6 @@
   .tailopt.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(25,25,75,.18)}
     /* Schwebender Cabin-Log-Button unten rechts (Lufthansa Blau) */
   .cabin-log-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     background: #002F6C; /* Exaktes Lufthansa-Blau */
     color: #ffffff; /* Weisser Text */
     border: 1px solid rgba(255,255,255,0.2);
@@ -172,8 +169,7 @@
     font-size: 13.5px;
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 1000;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
     transition: transform 0.2s, background-color 0.2s;
@@ -258,6 +254,9 @@
 <main>
   <div id="view"><div class="loading">Loading …</div></div>
 <div style="text-align:center;color:var(--mut);font-size:12px;margin:24px 0 10px;line-height:1.5">Made with ❤️ by Deli for OPSD Team 🌟</div>
+<div style="text-align:center;margin:0 0 28px">
+  <button class="cabin-log-btn" onclick="toggleCabinLog()">✈️ Cabin Log</button>
+</div>
 
 </main>
 <div id="toast" class="toast"></div>
@@ -764,13 +763,8 @@ window.addEventListener("hashchange", () => {
 
 loadAll(); // <-- Diese Zeile ist schon da
 
-loadAll();
 setInterval(tickCountdowns, 30000);
 </script>
-<!-- Schwebender Button (Immer sichtbar) -->
-<button class="cabin-log-btn" onclick="toggleCabinLog()">
-  ✈️ Cabin Log
-</button>
 
 <!-- Popup-Fenster (öffnet sich bei Klick) -->
 <div class="cabin-log-popup" id="cabinLogModal">
