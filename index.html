@@ -361,75 +361,65 @@ function countdownLine(){ const nk=nextKickoff(); if(!nk) return ""; const diff=
 function poolConsensusLine(){ const finished=matches.filter(m=>m.finished); if(!finished.length) return ""; const all=openConsensusRows(); return all.length?`<div class="livebar"><span class="livechip">Pool-Konsens: ${esc(all[0].label)}</span></div>`:""; }
 function openConsensusRows(){ const res=[]; matches.filter(m=>m.finished).forEach(m=>{ const rows=tips.filter(t=>t.match_id===m.id); if(!rows.length) return; const counts={}; rows.forEach(r=>{ const k=`${r.home_tip}:${r.away_tip}`; counts[k]=(counts[k]||0)+1; }); const best=Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]; if(best) res.push({id:m.id,label:best[0],n:best[1]}); }); return res.sort((a,b)=>b.n-a.n||a.label.localeCompare(b.label)); }
 
-function renderTip() {
-  // 1. Initial-Prüfungen (unverändert)
-  if (!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Control Tower</b> tab.</div>`;
-  if (!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
+function renderTip(){ 
+  if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Control Tower</b> tab.</div>`; 
+  if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`; 
 
-  // 2. Runden-Logik (unverändert)
-  const groupMatches = matches.filter(m => m.phase === "Group");
-  const rounds = [...new Set(groupMatches.map(m => m.round).filter(Boolean))].sort();
-  const hasRounds = rounds.length > 0;
-  const koMatches = matches.filter(m => m.phase !== "Group");
-  if (koMatches.length) rounds.push("Knockout");
-  if (hasRounds && !rounds.includes(tipRound)) tipRound = rounds[0] || "Round 1";
+  const groupMatches=matches.filter(m=>m.phase==="Group"); 
+  const rounds=[...new Set(groupMatches.map(m=>m.round).filter(Boolean))].sort(); 
 
-  // 3. Runden-Navigator bauen (mit korrigierter Logik)
-  // Die 'roundDot'-Logik ist jetzt hier integriert und prüft ALLE Spiele der Runde, nicht nur die offenen.
-  let nav = `<div class="round-nav" id="roundNav">`;
-  rounds.forEach(r => {
-    const allInRound = r === "Knockout" ? koMatches : matches.filter(m => m.round === r);
-    const pickedInRound = allInRound.filter(m => {const p = myPick(m.id); return p && p.home_tip != null;}).length;
-    
-    let dotColor = "#aab2ad"; // Grau (Standard: Runde vorbei)
-    if (allInRound.some(m => !isClosed(m))) { // Wenn noch Spiele offen sind...
-        dotColor = (pickedInRound === 0) ? "#e6eae8" : "#f4b400"; // Hellgrau (nichts getippt) oder Gelb (was getippt)
-    }
-    if (allInRound.length > 0 && pickedInRound === allInRound.length) {
-        dotColor = "#2d52c8"; // Blau (alle Spiele der Runde getippt)
-    }
+  const hasRounds=rounds.length>0; 
+  const koMatches=matches.filter(m=>m.phase!=="Group"); 
+  if(koMatches.length) rounds.push("Knockout"); 
+  if(hasRounds&&!rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
 
-    nav += `<button class="${r === tipRound ? "on" : ""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${dotColor}"></span>${esc(r)}</button>`;
-  });
-  nav += `</div>`;
-
-  // 4. Spiele für die aktuelle Ansicht und den "Picks"-Zähler vorbereiten (KORRIGIERT)
-  const visibleMatches = tipRound === "Knockout" ? koMatches : matches.filter(m => m.round === tipRound);
-  const fallback = !hasRounds ? matches : visibleMatches;
-
-  const totalInView = fallback.length;
-  const pickedInView = fallback.filter(m => {const p = myPick(m.id); return p && p.home_tip != null;}).length;
+  function roundDot(rnd){ 
+    const rm=rnd==="Knockout"?koMatches:matches.filter(m=>m.round===rnd); 
+    const open=rm.filter(m=>!isClosed(m)); 
+    const picked=open.filter(m=>{const p=myPick(m.id);return p&&p.home_tip!=null;}); 
+    if(open.length===0) return "#aab2ad"; 
+    if(picked.length===open.length) return "#2d52c8"; 
+    if(picked.length>0) return "#f4b400"; 
+    return "#e6eae8"; 
+  } 
   
-  const chips = [];
-  if (totalInView > 0) {
-    chips.push(`<span class="livechip">📝 ${pickedInView}/${totalInView} picks this round</span>`);
-  }
-  const statusBar = chips.length ? `<div class="livebar">${chips.join("")}</div>` : "";
+  let nav=`<div class="round-nav" id="roundNav">`; 
+  rounds.forEach(r=>{ 
+    nav+=`<button class="${r===tipRound?"on":""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${roundDot(r)}"></span>${esc(r)}</button>`; 
+  }); 
+  nav+=`</div>`; 
 
-  // 5. HTML für die Spielkarten generieren (unverändert)
-  const days = [];
-  fallback.forEach(m => {
-    let d = days.find(x => x.date === m.match_date);
-    if (!d) {
-      d = { date: m.match_date, ms: [] };
-      days.push(d);
-    }
-    d.ms.push(m);
-  });
+  const visible=tipRound==="Knockout"?koMatches:matches.filter(m=>m.round===tipRound); 
+  const fallback=!hasRounds?matches:visible; 
+
+  // --- HIER IST DIE EINZIGE KORREKTUR ---
+  const pickedInRound = fallback.filter(m => {const p = myPick(m.id); return p && p.home_tip != null;}).length;
+  const totalInRound = fallback.length; 
+
+  const chips=[]; 
+  if(totalInRound > 0) {
+    chips.push(`<span class="livechip">📝 ${pickedInRound}/${totalInRound} picks this round</span>`); 
+  }
+  // --- ENDE DER KORREKTUR ---
+
+  const statusBar=chips.length?`<div class="livebar">${chips.join("")}</div>`:""; 
+  const days=[]; 
+  fallback.forEach(m=>{ 
+    let d=days.find(x=>x.date===m.match_date); 
+    if(!d){d={date:m.match_date,ms:[]};days.push(d);} 
+    d.ms.push(m); 
+  }); 
   
-  let html = "";
-  days.forEach(d => {
-    html += `<div class="day">${esc(d.date)}</div>`;
-    d.ms.forEach(m => { html += matchCard(m); });
-    // Wichtig: Der Save-Button muss ausserhalb der Day-Schleife sein, damit es nur einen gibt.
-  });
-
-  // Ein einziger Save-Button am Ende, wenn nötig
-  if (fallback.some(m => !isClosed(m))) {
-    html += `<button class="btn" id="saveTips" style="width:100%;padding:14px;margin-top:8px">Save predictions</button>`;
-  }
-
-  return (hasRounds ? nav : "") + renderOpsLine() + statusBar + html;
+  let html=""; 
+  days.forEach(d=>{ 
+    html+=`<div class="day">${esc(d.date)}</div>`; 
+    d.ms.forEach(m=>{html+=matchCard(m);}); 
+    if(d.ms.some(m=>!isClosed(m))) {
+      html+=`<button class="btn js-savetips" style="width:100%;padding:13px;margin:4px 0 18px">Save predictions</button>`; 
+    }
+  }); 
+  
+  return (hasRounds?nav:"")+renderOpsLine()+statusBar+html; 
 }
 
 async function saveTips(){ const rows=[]; let missing=false; let invalid=false; [...document.querySelectorAll(".match[data-m]")].forEach(c=>{ const id=+c.dataset.m; const m=matches.find(x=>x.id===id); if(!m||isClosed(m)) return; const hEl=c.querySelector('[data-side="h"]'); const aEl=c.querySelector('[data-side="a"]'); const hRaw=hEl?hEl.value.trim():""; const aRaw=aEl?aEl.value.trim():""; if(hRaw===""&&aRaw==="") return; if(hRaw===""||aRaw===""){ missing=true; return; } const h=Number(hRaw); const a=Number(aRaw); if(!Number.isFinite(h)||!Number.isFinite(a)||h<0||a<0){ invalid=true; return; } rows.push({ player: me, match_id: id, home_tip: Math.round(h), away_tip: Math.round(a) }); }); if(missing){ toast("Please enter both home and away goals."); return; } if(invalid){ toast("Goals must be 0 or higher."); return; } if(!rows.length){ toast("Nothing to save yet."); return; } const { error } = await sb.from("tips").upsert(rows, { onConflict: "player,match_id" }); if(error){ toast("Save failed."); return; } await loadAll(); toast("Predictions saved."); }
