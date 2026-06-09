@@ -347,7 +347,7 @@ function tailSVG(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRA
 function tailHTML(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; return `<span style="display:inline-flex;width:${size}px;height:${size}px;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto"><img src="tails/${c}.png" width="${size}" height="${size}" alt="" style="display:none;object-fit:contain" onload="this.style.display='inline-block';var s=this.nextElementSibling;if(s)s.style.display='none'" onerror="this.remove()">${tailSVG(c,size)}</span>`; }
 function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_FILL[p.tail])?p.tail:"NEUTRAL"; }
 const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
 const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 const PRIZE_IMG="prize-schoki.jpg";
