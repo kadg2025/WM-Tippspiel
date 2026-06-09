@@ -290,6 +290,7 @@ function flagHTML(team){ const code=ISO[(team||"").trim()]; if(code) return `<im
   NEUTRAL: "#f0f2f5",      // Neutral: Helles Grau
   LX: "#D81E05",      // Swiss: Rot
   LH: "#05164d",      // Lufthansa: Navy Blau
+  OS: "#C8102E",      // Austrian: Rot
   SN: "#ffffff",      // Brussels: WEISS
   AZ: "#0064a2",      // ITA: Savoy Blau
   EW: "#80003F",      // Eurowings: Burgund
@@ -338,7 +339,7 @@ const TAIL_MOTIF={
 };
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",EN:"Air Dolomiti (EN)","4Y":"Discover (4Y)",LHC:"Lufthansa Cargo",DEV:"Dev </>"};
 const TAIL_ORDER=["NEUTRAL","LX","LH","EW","OS","SN","AZ","WK","EN","4Y","LHC","DEV"];
-const FIN = "M 5,28 L 18.5,3.5 C 19,2.5 20,2.5 20.5,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 6.5,29.5 C 5.5,29.5 4.8,29 5,28 Z";
+const FIN = "M 6,28 L 18.5,4.5 C 19,3 21,3 21.5,4.5 L 21.5,28 C 21.5,29 20.8,29.5 19.8,29.5 L 7.5,29.5 C 6.5,29.5 5.8,29 6,28 Z";
 function tailSVG(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; const fill=TAIL_FILL[c]; const motif=TAIL_MOTIF[c]||""; return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true" style="vertical-align:middle;flex:0 0 auto"><path d="${FIN}" fill="${fill}"/>${motif}<ellipse cx="16" cy="12" rx="2.6" ry="5.5" fill="#fff" opacity=".10" transform="rotate(22 16 12)"/><path d="${FIN}" fill="none" stroke="rgba(0,0,0,.2)" stroke-width=".8"/></svg>`; }
 function tailHTML(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; return `<span style="display:inline-flex;width:${size}px;height:${size}px;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto"><img src="tails/${c}.png" width="${size}" height="${size}" alt="" style="display:none;object-fit:contain" onload="this.style.display='inline-block';var s=this.nextElementSibling;if(s)s.style.display='none'" onerror="this.remove()">${tailSVG(c,size)}</span>`; }
 function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_FILL[p.tail])?p.tail:"NEUTRAL"; }
