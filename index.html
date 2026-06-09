@@ -430,10 +430,14 @@ function openConsensusRows(){ const res=[]; matches.filter(m=>m.finished).forEac
 
 function renderTip(){ 
   if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Control Tower</b> tab.</div>`; 
-  if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`; 
 
   // --- HIER: Code für das Profil-Panel einfügen ---
   const meBarHTML = `<div id="meBar" class="me"></div>`;
+  // ----------------------------------------------------
+
+  if(!me) return meBarHTML + `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
+
+  
   // ----------------------------------------------------
 
   const groupMatches=matches.filter(m=>m.phase==="Group");
@@ -499,7 +503,8 @@ function firstKickoff(){ const ks=matches.map(m=>m.kickoff?new Date(m.kickoff).g
 function bonusLocked(){ const f=firstKickoff(); return f!=null && Date.now()>=f; }
 function bonusCard(q){ const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===me); const myVal=a?a.answer:""; const closed=q.locked||bonusLocked(); const meta=`<div class="meta"><span>${q.points} pts ${q.qtype==="number"?"· closest wins":""}</span><span>${q.resolved?"✅ resolved":(closed?"🔒 closed":"open")}</span></div>`; let control=""; if(q.resolved||closed){ control=`<input type="text" value="${esc(myVal||"—")}" disabled>`; }else if(q.qtype==="choice"){ const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})(); control=`<select data-q="${q.id}"><option value="">Choose…</option>${opts.map(o=>`<option ${myVal===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`; }else if(q.qtype==="number"){ control=`<input type="number" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your number">`; }else{ control=`<input type="text" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your answer">`; } let footer=""; if(q.resolved){ const e=bonusEarned(q,me); footer=`<div class="correct"><span>Correct: <b>${esc(q.correct)}</b></span>${a?`<span class="pill ${e?"":"zero"}">${e||0} pts</span>`:`<span class="locked">no answer</span>`}</div>`; } return `<div class="bonus">${meta}<div class="q">${esc(q.question)}</div>${control}${footer}</div>`; }
 function renderBonus(){
-  if(!me) return `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to play the bonus round.</div>`;
+  const meBarHTML = `<div id="meBar" class="me"></div>`;
+  if(!me) return meBarHTML + `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to play the bonus round.</div>`;
   if(!bonusQs.length) return `<div class="empty">No bonus questions yet.<br>Big-picture predictions for the whole tournament will appear here. 🎲</div>`;
   let html=`<div class="opsline" style="margin-bottom:12px"><span class="label">${bonusLocked()?"✈ closed":"✈ important"}</span>${bonusLocked()?"These answers are now locked — the tournament has started.":"Answer all upgrades <b>before the first match</b> — they lock once it kicks off."}</div>`;
   html+=bonusQs.map(bonusCard).join("");
