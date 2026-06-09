@@ -287,25 +287,24 @@ const ISO={
 };
 function flagHTML(team){ const code=ISO[(team||"").trim()]; if(code) return `<img class="flag" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="" loading="lazy">`; return `<span class="flag-emoji">🌍</span>`; }
   const TAIL_FILL = {
-  LX: "#D81E05",      // Swiss Rot
-  LH: "#002F6C",      // Lufthansa Navy
-  EW: "#80003F",      // Eurowings Burgund
-  OS: "#E30613",      // Austrian Rot
-  SN: "#072E5B",      // Brussels Dunkelblau
-  AZ: "#0F2D59",      // ITA Savoy Blau
-  WK: "#E30613",      // Edelweiss Rot
-  EN: "#004F54",      // Air Dolomiti Dunkelgrün/Cyan
-  "4Y": "#005573",    // Discover Ocean Blue
-  LHC: "#1D252D",     // Lufthansa Cargo Dunkelgrau
-  DEV: "#1F2937",     // Developer Anthrazit
-  NEUTRAL: "#D1D5DB"  // Neutrales Silber-Grau
+  NEUTRAL: "#f0f2f5",      // Neutral: Helles Grau
+  LX: "#D81E05",      // Swiss: Rot
+  LH: "#05164d",      // Lufthansa: Navy Blau
+  SN: "#ffffff",      // Brussels: WEISS
+  AZ: "#0064a2",      // ITA: Savoy Blau
+  EW: "#80003F",      // Eurowings: Burgund
+  WK: "#E30613",      // Edelweiss: Rot
+  EN: "#0096a0",      // Air Dolomiti: TÜRKIS
+  "4Y": "#0b3d6f",    // Discover: Dunkelblau
+  LHC: "#1D252D",     // Lufthansa Cargo: Dunkelgrau
+  DEV: "#002f6c"       // DEV: Lufthansa Blau
 };
 const TAIL_MOTIF={
   // Swiss: Perfekt ausgerichtetes Schweizer Kreuz
   LX: '<rect x="14.5" y="11" width="3" height="8" fill="#fff" rx="0.5"/><rect x="12" y="13.5" width="8" height="3" fill="#fff" rx="0.5"/>',
   
   // Lufthansa: Silhouette des weltberühmten Lufthansa-Kranichs im Ring
-  LH: '<g stroke="#FFC72C" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="17.2" cy="15" r="4.2"/><path d="M 14,16 C 15,15.6 16.2,14.6 18.5,12.5 L 19,12.5 M 16.2,13.8 L 18,11.2 M 14.8,14.8 L 13.5,17 M 13.5,15.6 L 12.5,15.8"/></g>',
+  LH: '<g fill="#fff"><circle cx="17.5" cy="15" r="4.5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M 15,16.5 C 16,16.5 17,15.5 18,13.5 C 19,11.5 20.5,11 21.5,10.5 C 20,11.5 19,13.5 17,14.5 L 16.2,17 Z"/></g>',
   
   // Eurowings: Die geschwungenen, weissen EW-Schwingen
   EW: '<path d="M 11,28 C 15,22 20,17 24,15 L 22,28 Z" fill="#00A1DE" opacity="0.8"/><path d="M 13,28 C 17,23 21,19 25,18 L 23,28 Z" fill="#fff" opacity="0.9"/>',
@@ -314,28 +313,28 @@ const TAIL_MOTIF={
   OS: '<polygon points="4.5,21 24.5,14 24.5,21 4.5,28" fill="#fff"/><path d="M 12,21.5 L 16.5,17.5 L 18,18.5 L 13.5,22.5 Z" fill="#E30613"/>',
   
   // Brussels: Das rote B-Punktemuster auf dunkelblauem Grund
-  SN: '<circle cx="13" cy="17" r="1" fill="#E30613"/><circle cx="16" cy="14.5" r="1.3" fill="#E30613"/><circle cx="19" cy="12" r="1" fill="#E30613"/><circle cx="15.5" cy="18.5" r="1" fill="#E30613"/><circle cx="18.5" cy="16" r="1.2" fill="#E30613"/><circle cx="21" cy="13.5" r="0.8" fill="#E30613"/>',
+  SN: '<circle cx="13" cy="18" r="1.3" fill="#E30613"/><circle cx="16.5" cy="15" r="1.8" fill="#E30613"/><circle cx="20" cy="12" r="1.5" fill="#E30613"/><circle cx="15.5" cy="20" r="0.9" fill="#c0c5ce"/><circle cx="19" cy="18" r="1.2" fill="#c0c5ce"/><circle cx="22" cy="15" r="0.8" fill="#c0c5ce"/>',
   
   // ITA Airways: Die italienische Trikolore an der Hinterkante
-  AZ: '<path d="M 18,3.5 L 20.5,3.5 L 18.5,29.5 L 16,29.5 Z" fill="#008C45"/><path d="M 19,3.5 L 21.5,3.5 L 19.5,29.5 L 17,29.5 Z" fill="#fff" opacity="0.9"/><path d="M 20,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 18,29.5 Z" fill="#CD212A"/>',
+  AZ: '<path d="M 20.5,3.5 L 23,3.5 L 21,29.5 L 18.5,29.5 Z" fill="#008C45"/><path d="M 22,3.5 L 24.5,3.5 L 22.5,29.5 L 20,29.5 Z" fill="#fff"/><path d="M 23.5,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 21.5,29.5 Z" fill="#CD212A"/>',
   
   // Edelweiss: Die schöne Alpentextur mit gelbem Kern
   WK: '<g transform="translate(-0.5,1)"><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(30, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(90, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(150, 18, 15)" fill="#fff"/><circle cx="18" cy="15" r="1" fill="#FFCC00"/></g>',
   
   // Air Dolomiti: Das elegante, türkis-blaue Kompass-Symbol
-  EN: '<polygon points="17.5,9 20.5,14 17.5,19 14.5,14" fill="#00A1DE"/><polygon points="17.5,11 19,14 17.5,17 16,14" fill="#fff"/>',
+  EN: '<polygon points="17.5,9 20,13 17.5,17 15,13" fill-opacity="0.2" fill="#fff"/><polygon points="17.5,10 19,13 17.5,16 16,13" fill-opacity="0.3" fill="#fff"/>',
   
   // Discover: Das wunderschöne, mehrfarbige Drei-Punkte-Design
-  "4Y": '<circle cx="14" cy="18" r="2.2" fill="#FFCC00"/><circle cx="17.5" cy="14.5" r="2.5" fill="#00A1DE"/><circle cx="21" cy="11" r="1.8" fill="#fff" opacity="0.9"/>',
+  "4Y": '<defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3cb4e7"/><stop offset="100%" stop-color="#0b3d6f"/></linearGradient></defs><path d="M 5,28 L 18.5,3.5 C 19,2.5 20,2.5 20.5,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 6.5,29.5 C 5.5,29.5 4.8,29 5,28 Z" fill="url(#g)"/><path d="M 19.5,3.5 L 21.2,3.5 L 18,12 L 16,12 Z" fill="#fdd835"/>',
   
   // Lufthansa Cargo: Gelbes Cargo-Branding auf der Flossenspitze
   LHC: '<path d="M 15.5,9.5 L 20.5,3.5 C 20.8,3.1 21.5,3.1 21.8,3.5 L 22.5,6.5 L 17.5,12.5 Z" fill="#FFC72C"/>',
   
   // Developer: Scharfes Code-Symbol
-  DEV: '<text x="17.5" y="18" font-size="7" font-family="ui-monospace,monospace" font-weight="900" fill="#10B981" text-anchor="middle">&lt;/&gt;</text>',
+  DEV: '<text x="17" y="20" font-size="9" font-family="ui-monospace,monospace" font-weight="900" fill="#fff" text-anchor="middle" transform="rotate(-5, 17, 18)">&lt;/&gt;</text>',
   
   // Neutral: Schlichtes, dezentes weisses Band
-  NEUTRAL: '<rect x="13" y="14" width="7" height="1.5" rx="0.5" fill="#fff" opacity="0.75" transform="rotate(-10 16.5 14.5)"/>'
+  NEUTRAL: '<path d="M16 9 L19 14 L16 15 L13 14 Z M16 16 L16 22 L14 23 L14 16 L11 18 L11 20 L14 19 L16 20 L16 23 L18 22 L18 20 L21 19 L21 18 L18 16 L18 14 Z" fill="#b9c0cb"/>',
 };
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",EN:"Air Dolomiti (EN)","4Y":"Discover (4Y)",LHC:"Lufthansa Cargo",DEV:"Dev </>"};
 const TAIL_ORDER=["NEUTRAL","LX","LH","EW","OS","SN","AZ","WK","EN","4Y","LHC","DEV"];
@@ -384,7 +383,7 @@ function renderOpsLine(){ const msg=currentOpsNews(); return msg?`<div class="op
 function totals(){ const players=new Set(); tips.forEach(t=>players.add(t.player)); bonusAnswers.forEach(a=>players.add(a.player)); return [...players].map(name=>{ let pts=0,exact=0,bonus=0; tips.filter(t=>t.player===name).forEach(t=>{ const m=matches.find(x=>x.id===t.match_id); const s=scoreOf(t,m); if(s!=null){pts+=s;if(isExactHit(t,m))exact++;} }); bonusQs.forEach(q=>{const e=bonusEarned(q,name);if(e){pts+=e;bonus+=e;}}); return {name,pts,exact,bonus}; }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name)); }
 function renderMe(){ const bar=$("#meBar");
   if(!me){
-    const picker=TAIL_ORDER.map(c=>`<button type="button" class="tailopt${c==="NEUTRAL"?" sel":""}" data-tail="${c}" title="${esc(TAIL_LABEL[c])}">${tailSVG(c,30)}</button>`).join("");
+    const picker=TAIL_ORDER.map(c=>`<button type="button" class="tailopt${c==="NEUTRAL"?" sel":""}" data-tail="${c}" title="${esc(TAIL_LABEL[c])}">${tailSVG(c,40)}</button>`).join("");
     bar.innerHTML=`<label>Who are you?</label><div class="row" style="margin-top:8px"><input id="nameIn" type="text" placeholder="Your name" maxlength="24" style="flex:1"></div><label style="margin-top:12px;display:block">Pick your airline tail</label><div id="tailPick" style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px">${picker}</div><button class="btn" id="setName" style="width:100%">Join</button><div class="hint" style="margin:8px 0 0">Your name puts you on the Flight Deck — spell it the same every time. Your tail is just for fun; you can change it later via “switch”. 😉</div>`;
     let joinTail=null;
     document.querySelectorAll("#tailPick .tailopt").forEach(b=>b.onclick=()=>{ joinTail=b.dataset.tail; document.querySelectorAll("#tailPick .tailopt").forEach(x=>x.classList.toggle("sel",x===b)); });
