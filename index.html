@@ -158,6 +158,71 @@
   .cd-chip{display:inline-block;background:#eef1fb;color:var(--accent);border:1px solid #d7ddf5;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.2px;white-space:nowrap}
   .tailopt{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:5px;cursor:pointer;line-height:0;display:inline-flex}
   .tailopt.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(25,25,75,.18)}
+    /* Schwebender Cabin-Log-Button unten rechts (Lufthansa Blau) */
+  .cabin-log-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #002F6C; /* Exaktes Lufthansa-Blau */
+    color: #ffffff; /* Weisser Text */
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 30px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  .cabin-log-btn:hover {
+    background: #00204a; /* Etwas dunkleres Blau beim Drüberfahren */
+    transform: scale(1.05);
+  }
+
+  /* Kleines Feedback-Popup-Fenster direkt über dem Button */
+  .cabin-log-popup {
+    display: none; /* Am Anfang unsichtbar */
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    width: 300px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(16,16,48,0.2);
+    z-index: 1000;
+  }
+  .cabin-log-popup h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .cabin-log-popup textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px;
+    font: inherit;
+    font-size: 13px;
+    resize: none;
+  }
+  .cabin-log-popup textarea:focus {
+    outline: none;
+    border-color: #002F6C;
+  }
+  .cabin-log-popup .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
 </style>
 </head>
 <body>
@@ -511,8 +576,58 @@ function renderView(){
     if(dm) dm.onclick=()=>{ const csv=buildManifest(); const blob=new Blob([csv],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`opsd-flight-deck-${todayKey()}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href); };
   }
 }
+
+// Öffnet und schliesst das Feedback-Popup
+function toggleCabinLog() {
+  const modal = document.getElementById("cabinLogModal");
+  if (modal.style.display === "block") {
+    modal.style.display = "none";
+  } else {
+    modal.style.display = "block";
+    document.getElementById("cabinLogText").value = "";
+    document.getElementById("cabinLogText").focus();
+  }
+}
+
+// Sendet die Nachricht anonym an Supabase
+async function sendCabinLog() {
+  const txt = document.getElementById("cabinLogText").value.trim();
+  if (!txt) {
+    toast("Please enter a message.");
+    return;
+  }
+  
+  // Sendet den Text an deine neue Supabase-Tabelle "feedback"
+  const { error } = await sb.from("feedback").insert([{ message: txt }]);
+  
+  if (error) {
+    toast("Could not submit log entry. Sorry!");
+  } else {
+    toast("Log entry submitted! Thank you 🙏");
+    document.getElementById("cabinLogModal").style.display = "none";
+  }
+}
+
 loadAll();
 setInterval(tickCountdowns, 30000);
 </script>
+<!-- Schwebender Button (Immer sichtbar) -->
+<button class="cabin-log-btn" onclick="toggleCabinLog()">
+  ✈️ Cabin Log
+</button>
+
+<!-- Popup-Fenster (öffnet sich bei Klick) -->
+<div class="cabin-log-popup" id="cabinLogModal">
+  <h4>✈️ Cabin Log Entry</h4>
+  <div style="font-size:12px; color:var(--mut); margin-bottom:8px; line-height:1.4;">
+    Spotted a bug or have an idea? Log it here anonymously.
+  </div>
+  <textarea id="cabinLogText" placeholder="Your message to the flight deck..."></textarea>
+  <div class="actions">
+    <button class="btn ghost sm" onclick="toggleCabinLog()">Cancel</button>
+    <button class="btn sm" onclick="sendCabinLog()">Submit</button>
+  </div>
+</div>
+
 </body>
 </html>
