@@ -287,58 +287,54 @@ const ISO={
 };
 function flagHTML(team){ const code=ISO[(team||"").trim()]; if(code) return `<img class="flag" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="" loading="lazy">`; return `<span class="flag-emoji">🌍</span>`; }
   const TAIL_FILL = {
-  NEUTRAL: "#f0f2f5",      // Neutral: Helles Grau
-  LX: "#D81E05",      // Swiss: Rot
-  LH: "#05164d",      // Lufthansa: Navy Blau
-  OS: "#C8102E",      // Austrian: Rot
-  SN: "#ffffff",      // Brussels: WEISS
-  AZ: "#0064a2",      // ITA: Savoy Blau
-  EW: "#80003F",      // Eurowings: Burgund
-  WK: "#E30613",      // Edelweiss: Rot
-  EN: "#0096a0",      // Air Dolomiti: TÜRKIS
-  "4Y": "#0b3d6f",    // Discover: Dunkelblau
-  LHC: "#1D252D",     // Lufthansa Cargo: Dunkelgrau
-  DEV: "#002f6c"       // DEV: Lufthansa Blau
+  NEUTRAL: "#f0f2f5",      // Neutral: Helles Grau (jetzt leer)
+  DEV: "#002f6c",          // DEV: Lufthansa Blau
+  LX: "#D81E05",          // Swiss: Rot
+  LH: "#05164d",          // Lufthansa: Navy Blau
+  EW: "#80003F",          // Eurowings: Burgund
+  AZ: "#0064a2",          // ITA: Savoy Blau
+  SN: "#ffffff",          // Brussels: WEISS
+  OS: "#C8102E",          // Austrian: Rot
+  WK: "#E30613",          // Edelweiss: Rot
+  EN: "#0096a0",          // Air Dolomiti: TÜRKIS
+  "4Y": "#0b3d6f",        // Discover: Grundfarbe Dunkelblau
+  LHC: "#05164d"           // Lufthansa Cargo: LUFTHANSA BLAU
+
 };
-const TAIL_MOTIF={
-  // Swiss: Perfekt ausgerichtetes Schweizer Kreuz
-  LX: '<rect x="14.5" y="11" width="3" height="8" fill="#fff" rx="0.5"/><rect x="12" y="13.5" width="8" height="3" fill="#fff" rx="0.5"/>',
+const TAIL_MOTIF = {
+  // DEV: Blau mit weissem, vertikalem Code
+  DEV: '<text x="11" y="-19" font-size="9" font-family="ui-monospace,monospace" font-weight="900" fill="#fff" text-anchor="middle" transform="rotate(90)"> &lt;/&gt; </text>',
+
+  // LX (Swiss): Perfekt zentriertes Kreuz
+  LX: '<rect x="14.5" y="12" width="3" height="10" fill="#fff" rx="0.5"/><rect x="12" y="15" width="8" height="3" fill="#fff" rx="0.5"/>',
+
+  // LH (Lufthansa): Weisser Kranich, zentriert im Kreis
+  LH: '<g fill="#fff"><circle cx="17.5" cy="16" r="5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M 15,17.5 C 16,17.5 17,16.5 18,14.5 C 19,12.5 20.5,12 21.5,11.5 C 20,12.5 19,14.5 17,15.5 L 16.2,18 Z"/></g>',
+
+  // SN (Brussels): Rote & graue Punkte auf weissem Grund
+  SN: '<circle cx="14" cy="19" r="1.3" fill="#E30613"/><circle cx="17.5" cy="16" r="1.8" fill="#E30613"/><circle cx="21" cy="13" r="1.5" fill="#E30613"/><circle cx="16.5" cy="21" r="0.9" fill="#c0c5ce"/><circle cx="20" cy="19" r="1.2" fill="#c0c5ce"/><circle cx="23" cy="16" r="0.8" fill="#c0c5ce"/>',
+
+  // WK (Edelweiss): Blume zentriert
+  WK: '<g transform="translate(0, 1)"><ellipse cx="18" cy="16" rx="4" ry="1.5" transform="rotate(30, 18, 16)" fill="#fff"/><ellipse cx="18" cy="16" rx="4" ry="1.5" transform="rotate(90, 18, 16)" fill="#fff"/><ellipse cx="18" cy="16" rx="4" ry="1.5" transform="rotate(150, 18, 16)" fill="#fff"/><circle cx="18" cy="16" r="1.2" fill="#FFCC00"/></g>',
   
-  // Lufthansa: Silhouette des weltberühmten Lufthansa-Kranichs im Ring
-  LH: '<g fill="#fff"><circle cx="17.5" cy="15" r="4.5" fill="none" stroke="#fff" stroke-width="1.2"/><path d="M 15,16.5 C 16,16.5 17,15.5 18,13.5 C 19,11.5 20.5,11 21.5,10.5 C 20,11.5 19,13.5 17,14.5 L 16.2,17 Z"/></g>',
-  
-  // Eurowings: Die geschwungenen, weissen EW-Schwingen
+  // EN (Air Dolomiti): Weisses Symbol von rechts nach links
+  EN: '<polygon points="17,10 14,14 17,18 20,14" fill-opacity="0.5" fill="#fff"/>',
+
+  // 4Y (Discover): Horizontale Streifen
+  "4Y": '<defs><linearGradient id="discover-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#FFC72C"/><stop offset="15%" stop-color="#3cb4e7"/><stop offset="50%" stop-color="#00A1DE"/><stop offset="100%" stop-color="#0b3d6f"/></linearGradient></defs><rect x="0" y="0" width="32" height="32" fill="url(#discover-grad)"/>',
+
+  // Neutral: Komplett leer
+  NEUTRAL: '',
+
+  // Bestehende, bereits gute SVGs
   EW: '<path d="M 11,28 C 15,22 20,17 24,15 L 22,28 Z" fill="#00A1DE" opacity="0.8"/><path d="M 13,28 C 17,23 21,19 25,18 L 23,28 Z" fill="#fff" opacity="0.9"/>',
-  
-  // Austrian: Die rot-weiss-rote Flagge mit dem weissen Chevron
   OS: '<polygon points="4.5,21 24.5,14 24.5,21 4.5,28" fill="#fff"/><path d="M 12,21.5 L 16.5,17.5 L 18,18.5 L 13.5,22.5 Z" fill="#E30613"/>',
-  
-  // Brussels: Das rote B-Punktemuster auf dunkelblauem Grund
-  SN: '<circle cx="13" cy="18" r="1.3" fill="#E30613"/><circle cx="16.5" cy="15" r="1.8" fill="#E30613"/><circle cx="20" cy="12" r="1.5" fill="#E30613"/><circle cx="15.5" cy="20" r="0.9" fill="#c0c5ce"/><circle cx="19" cy="18" r="1.2" fill="#c0c5ce"/><circle cx="22" cy="15" r="0.8" fill="#c0c5ce"/>',
-  
-  // ITA Airways: Die italienische Trikolore an der Hinterkante
-  AZ: '<rect x="0" y="0" width="11" height="32" fill="#008C45"/><rect x="11" y="0" width="4" height="32" fill="#ffffff"/><rect x="15" y="0" width="17" height="32" fill="#CD212A"/>',
-  
-  // Edelweiss: Die schöne Alpentextur mit gelbem Kern
-  WK: '<g transform="translate(-0.5,1)"><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(30, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(90, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(150, 18, 15)" fill="#fff"/><circle cx="18" cy="15" r="1" fill="#FFCC00"/></g>',
-  
-  // Air Dolomiti: Das elegante, türkis-blaue Kompass-Symbol
-  EN: '<polygon points="17.5,9 20,13 17.5,17 15,13" fill-opacity="0.2" fill="#fff"/><polygon points="17.5,10 19,13 17.5,16 16,13" fill-opacity="0.3" fill="#fff"/>',
-  
-  // Discover: Das wunderschöne, mehrfarbige Drei-Punkte-Design
-  "4Y": '<defs><linearGradient id="discover-grad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#3cb4e7"/><stop offset="100%" stop-color="#0b3d6f"/></linearGradient></defs><rect x="0" y="0" width="32" height="32" fill="url(#discover-grad)"/><path d="M 18,3 L 23,3 L 18,12 L 14,12 Z" fill="#FFCC00"/>',
-  
-  // Lufthansa Cargo: Gelbes Cargo-Branding auf der Flossenspitze
-  LHC: '<path d="M 15.5,9.5 L 20.5,3.5 C 20.8,3.1 21.5,3.1 21.8,3.5 L 22.5,6.5 L 17.5,12.5 Z" fill="#FFC72C"/>',
-  
-  // Developer: Scharfes Code-Symbol
-  DEV: '<text x="17" y="20" font-size="9" font-family="ui-monospace,monospace" font-weight="900" fill="#fff" text-anchor="middle" transform="rotate(-5, 17, 18)">&lt;/&gt;</text>',
-  
-  // Neutral: Schlichtes, dezentes weisses Band
-  NEUTRAL: '<path d="M16 9 L19 14 L16 15 L13 14 Z M16 16 L16 22 L14 23 L14 16 L11 18 L11 20 L14 19 L16 20 L16 23 L18 22 L18 20 L21 19 L21 18 L18 16 L18 14 Z" fill="#b9c0cb"/>',
+  AZ: '<path d="M 20.5,3.5 L 23,3.5 L 21,29.5 L 18.5,29.5 Z" fill="#008C45"/><path d="M 22,3.5 L 24.5,3.5 L 22.5,29.5 L 20,29.5 Z" fill="#fff"/><path d="M 23.5,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 21.5,29.5 Z" fill="#CD212A"/>',
+  LHC: '<path d="M 15.5,9.5 L 20.5,3.5 C 20.8,3.1 21.5,3.1 21.8,3.5 L 22.5,6.5 L 17.5,12.5 Z" fill="#FFC72C"/>'
 };
+
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",EN:"Air Dolomiti (EN)","4Y":"Discover (4Y)",LHC:"Lufthansa Cargo",DEV:"Dev </>"};
-const TAIL_ORDER=["NEUTRAL","LX","LH","EW","OS","SN","AZ","WK","EN","4Y","LHC","DEV"];
+const TAIL_ORDER = ["DEV", "LX", "LH", "EW", "AZ", "SN", "OS", "WK", "EN", "4Y", "LHC", "NEUTRAL"];
 const FIN = "M 6,28 L 18.5,4.5 C 19,3 21,3 21.5,4.5 L 21.5,28 C 21.5,29 20.8,29.5 19.8,29.5 L 7.5,29.5 C 6.5,29.5 5.8,29 6,28 Z";
 function tailSVG(code, size) {
   size = size || 24;
