@@ -225,7 +225,7 @@
 <script>
   const SUPABASE_URL = "https://dgjfydzjgokzigklgchj.supabase.co";
   const SUPABASE_KEY = "sb_publishable_mRkwbCEvlRcQL8wk3YSJ4g_6ceY3yUz";
-  const ADMIN_PW_B64 = "V00yMDI2"; // Base64-verschlüsseltes Passwort, thanks Andreas :)
+  const ADMIN_PW = "V00yMDI2"; //   Thanks Andreas :)
   const TEAM_TITEL   = "World Cup Pool";
   const LOGO_URL     = "opsd-logo.png";
   const SCORE        = {
@@ -634,7 +634,7 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
 if(tab==="admin"&&!adminOK){
   const b=document.getElementById("alogin");
   if(b){
-    b.onclick=()=>{ if(btoa(document.getElementById("apw").value)===ADMIN_PW_B64){adminOK=true;renderView();} else toast("Wrong password"); };
+    b.onclick=()=>{ if(btoa(document.getElementById("apw").value)===ADMIN_PW){adminOK=true;renderView();} else toast("Wrong password"); };
     document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
   }
 }
