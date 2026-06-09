@@ -286,24 +286,63 @@ const ISO={
   "Iraq":"iq","Irak":"iq","UAE":"ae","United Arab Emirates":"ae"
 };
 function flagHTML(team){ const code=ISO[(team||"").trim()]; if(code) return `<img class="flag" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="" loading="lazy">`; return `<span class="flag-emoji">🌍</span>`; }
-const TAIL_FILL={LX:"#d52b1e",LH:"#05164d",EW:"#8a1f3d",OS:"#c8102e",SN:"#e4e4e4",AZ:"#002b5c",WK:"#e2001a",EN:"#1d4b8f","4Y":"#20204f",LHC:"#3a4250",DEV:"#1f2430",NEUTRAL:"#b9c0cb"};
-const TAIL_MOTIF={
- LX:'<rect x="16.8" y="12.5" width="2.4" height="9" fill="#fff"/><rect x="14.6" y="15.8" width="7.4" height="2.4" fill="#fff"/>',
- LH:'<circle cx="18.4" cy="17" r="3.5" fill="none" stroke="#f0b419" stroke-width="1.9"/>',
- EW:'<rect x="16.9" y="10" width="2.6" height="15" rx="1.3" fill="#fff" transform="rotate(20 18 17)"/>',
- OS:'<path d="M14.6 20 L18.4 14.6 L22.2 20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
- SN:'<circle cx="15.8" cy="14.2" r="1.4" fill="#d52b1e"/><circle cx="19.2" cy="15.2" r="1.4" fill="#d52b1e"/><circle cx="16.8" cy="18" r="1.4" fill="#d52b1e"/><circle cx="20.2" cy="18.8" r="1.4" fill="#d52b1e"/>',
- AZ:'<rect x="16.5" y="14" width="1.7" height="8" fill="#008c45"/><rect x="18.4" y="14" width="1.7" height="8" fill="#fff"/><rect x="20.3" y="14" width="1.7" height="8" fill="#cd212a"/>',
- WK:'<g fill="#fff"><circle cx="18.5" cy="13.6" r="1.5"/><circle cx="21" cy="15.6" r="1.5"/><circle cx="20" cy="18.6" r="1.5"/><circle cx="17" cy="18.6" r="1.5"/><circle cx="16" cy="15.6" r="1.5"/></g><circle cx="18.5" cy="16.6" r="1.3" fill="#f0b419"/>',
- EN:'<rect x="16.9" y="11" width="2.6" height="13" rx="1.3" fill="#3cb44b" transform="rotate(18 18 17)"/>',
- "4Y":'<g stroke="#f5a623" stroke-width="1.3" stroke-linecap="round"><line x1="18.4" y1="11.8" x2="18.4" y2="13.2"/><line x1="18.4" y1="20.8" x2="18.4" y2="22.2"/><line x1="15.3" y1="17" x2="16.5" y2="17"/><line x1="20.3" y1="17" x2="21.5" y2="17"/></g><circle cx="18.4" cy="17" r="2.3" fill="#f5a623"/>',
- LHC:'<rect x="14.8" y="15.7" width="7.7" height="2.6" rx="0.6" fill="#f0b419"/>',
- DEV:'<text x="18" y="20.5" font-size="9" font-family="ui-monospace,monospace" font-weight="700" fill="#5eead4" text-anchor="middle">&lt;/&gt;</text>',
- NEUTRAL:'<rect x="15" y="17" width="8" height="1.8" rx="0.9" fill="#fff" opacity=".85"/>'
+const TAIL_FILL={
+  const TAIL_FILL = {
+  LX: "#D81E05",      // Swiss Rot
+  LH: "#002F6C",      // Lufthansa Navy
+  EW: "#80003F",      // Eurowings Burgund
+  OS: "#E30613",      // Austrian Rot
+  SN: "#072E5B",      // Brussels Dunkelblau
+  AZ: "#0F2D59",      // ITA Savoy Blau
+  WK: "#E30613",      // Edelweiss Rot
+  EN: "#004F54",      // Air Dolomiti Dunkelgrün/Cyan
+  "4Y": "#005573",    // Discover Ocean Blue
+  LHC: "#1D252D",     // Lufthansa Cargo Dunkelgrau
+  DEV: "#1F2937",     // Developer Anthrazit
+  NEUTRAL: "#D1D5DB"  // Neutrales Silber-Grau
 };
+const TAIL_MOTIF={
+  const TAIL_MOTIF = {
+  // Swiss: Perfekt ausgerichtetes Schweizer Kreuz
+  LX: '<rect x="14.5" y="11" width="3" height="8" fill="#fff" rx="0.5"/><rect x="12" y="13.5" width="8" height="3" fill="#fff" rx="0.5"/>',
+  
+  // Lufthansa: Silhouette des weltberühmten Lufthansa-Kranichs im Ring
+  LH: '<circle cx="17.5" cy="15" r="4.5" fill="none" stroke="#FFC72C" stroke-width="1"/><path d="M 15,16.5 C 16,16.5 17,15.5 18,13.5 C 19,11.5 20.5,11 21.5,10.5 C 20,11.5 19,13.5 17,14.5 L 16.2,17 Z" fill="#FFC72C"/>',
+  
+  // Eurowings: Die geschwungenen, weissen EW-Schwingen
+  EW: '<path d="M 11,28 C 15,22 20,17 24,15 L 22,28 Z" fill="#00A1DE" opacity="0.8"/><path d="M 13,28 C 17,23 21,19 25,18 L 23,28 Z" fill="#fff" opacity="0.9"/>',
+  
+  // Austrian: Die rot-weiss-rote Flagge mit dem weissen Chevron
+  OS: '<polygon points="4.5,21 24.5,14 24.5,21 4.5,28" fill="#fff"/><path d="M 12,21.5 L 16.5,17.5 L 18,18.5 L 13.5,22.5 Z" fill="#E30613"/>',
+  
+  // Brussels: Das rote B-Punktemuster auf dunkelblauem Grund
+  SN: '<circle cx="13" cy="17" r="1" fill="#E30613"/><circle cx="16" cy="14.5" r="1.3" fill="#E30613"/><circle cx="19" cy="12" r="1" fill="#E30613"/><circle cx="15.5" cy="18.5" r="1" fill="#E30613"/><circle cx="18.5" cy="16" r="1.2" fill="#E30613"/><circle cx="21" cy="13.5" r="0.8" fill="#E30613"/>',
+  
+  // ITA Airways: Die italienische Trikolore an der Hinterkante
+  AZ: '<path d="M 18,3.5 L 20.5,3.5 L 18.5,29.5 L 16,29.5 Z" fill="#008C45"/><path d="M 19,3.5 L 21.5,3.5 L 19.5,29.5 L 17,29.5 Z" fill="#fff" opacity="0.9"/><path d="M 20,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 18,29.5 Z" fill="#CD212A"/>',
+  
+  // Edelweiss: Die schöne Alpentextur mit gelbem Kern
+  WK: '<g transform="translate(-0.5,1)"><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(30, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(90, 18, 15)" fill="#fff"/><ellipse cx="18" cy="15" rx="3.5" ry="1.2" transform="rotate(150, 18, 15)" fill="#fff"/><circle cx="18" cy="15" r="1" fill="#FFCC00"/></g>',
+  
+  // Air Dolomiti: Das elegante, türkis-blaue Kompass-Symbol
+  EN: '<polygon points="17.5,9 20.5,14 17.5,19 14.5,14" fill="#00A1DE"/><polygon points="17.5,11 19,14 17.5,17 16,14" fill="#fff"/>',
+  
+  // Discover: Das wunderschöne, mehrfarbige Drei-Punkte-Design
+  "4Y": '<circle cx="14" cy="18" r="2.2" fill="#FFCC00"/><circle cx="17.5" cy="14.5" r="2.5" fill="#00A1DE"/><circle cx="21" cy="11" r="1.8" fill="#fff" opacity="0.9"/>',
+  
+  // Lufthansa Cargo: Gelbes Cargo-Branding auf der Flossenspitze
+  LHC: '<path d="M 15.5,9.5 L 20.5,3.5 C 20.8,3.1 21.5,3.1 21.8,3.5 L 22.5,6.5 L 17.5,12.5 Z" fill="#FFC72C"/>',
+  
+  // Developer: Scharfes Code-Symbol
+  DEV: '<text x="17.5" y="18" font-size="7" font-family="ui-monospace,monospace" font-weight="900" fill="#10B981" text-anchor="middle">&lt;/&gt;</text>',
+  
+  // Neutral: Schlichtes, dezentes weisses Band
+  NEUTRAL: '<rect x="13" y="14" width="7" height="1.5" rx="0.5" fill="#fff" opacity="0.75" transform="rotate(-10 16.5 14.5)"/>'
+};
+
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",EN:"Air Dolomiti (EN)","4Y":"Discover (4Y)",LHC:"Lufthansa Cargo",DEV:"Dev </>"};
 const TAIL_ORDER=["NEUTRAL","LX","LH","EW","OS","SN","AZ","WK","EN","4Y","LHC","DEV"];
-const FIN="M9.5 26.5 L19 6.5 C20 4.5 22.8 4.8 23.2 7.2 L25.5 26.5 C25.6 27.4 25 28 24 28 L11 28 C10 28 9.4 27.4 9.5 26.5 Z";
+const FIN = "M 5,28 L 18.5,3.5 C 19,2.5 20,2.5 20.5,3.5 L 27,28 C 27.3,29 26.5,29.5 25.5,29.5 L 6.5,29.5 C 5.5,29.5 4.8,29 5,28 Z";
 function tailSVG(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; const fill=TAIL_FILL[c]; const motif=TAIL_MOTIF[c]||""; return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true" style="vertical-align:middle;flex:0 0 auto"><path d="${FIN}" fill="${fill}"/>${motif}<ellipse cx="16" cy="12" rx="2.6" ry="5.5" fill="#fff" opacity=".10" transform="rotate(22 16 12)"/><path d="${FIN}" fill="none" stroke="rgba(0,0,0,.2)" stroke-width=".8"/></svg>`; }
 function tailHTML(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; return `<span style="display:inline-flex;width:${size}px;height:${size}px;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto"><img src="tails/${c}.png" width="${size}" height="${size}" alt="" style="display:none;object-fit:contain" onload="this.style.display='inline-block';var s=this.nextElementSibling;if(s)s.style.display='none'" onerror="this.remove()">${tailSVG(c,size)}</span>`; }
 function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_FILL[p.tail])?p.tail:"NEUTRAL"; }
