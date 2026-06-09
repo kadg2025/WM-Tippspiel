@@ -312,7 +312,16 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1900);};
 const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 const PRIZE_IMG="prize-schoki.jpg";
-let matches=[],tips=[],bonusQs=[],bonusAnswers=[],players=[],tab="tip",adminOK=false,tipRound="Round 1",_lastRank1=null;
+let matches=[],tips=[],bonusQs=[],bonusAnswers=[],players=[];
+
+// --- HIER: Start-Tab aus URL auslesen ---
+const validTabs = ["tip", "rules", "bonus", "rank", "crew", "prizes", "admin"];
+const urlHash = window.location.hash.replace("#", "");
+let tab = validTabs.includes(urlHash) ? urlHash : "tip";
+// ----------------------------------------
+
+let adminOK=false,tipRound="Round 1",_lastRank1=null;
+
 let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
 const OPS_PRESETS=["Boarding call: predictions for the day are open.","Final boarding reminder: predictions close 5 minutes before kickoff.","Flight Deck update: every scored match can reshuffle the leaderboard.","Prize cargo check: SWISS Schoki is waiting for the top 3.","Control Tower note: one sharp prediction can change everything."];
 const OPS_TEAM_MESSAGES={"Germany":"Viel Glück, Deutschland!","Deutschland":"Viel Glück, Deutschland!","Switzerland":"Hopp Schwiiz!","Schweiz":"Hopp Schwiiz!","Poland":"Powodzenia, Polsko!","Polen":"Powodzenia, Polsko!","France":"Bonne chance, la France !","Frankreich":"Bonne chance, la France !","Portugal":"Boa sorte, Portugal!","Netherlands":"Succes, Nederland!","Niederlande":"Succes, Nederland!","Argentina":"¡Mucha suerte, Argentina!","Argentinien":"¡Mucha suerte, Argentina!","Turkey":"İyi şanslar, Türkiye!","Türkei":"İyi şanslar, Türkiye!","Türkiye":"İyi şanslar, Türkiye!","Austria":"Viel Glück, Österreich!","Österreich":"Viel Glück, Österreich!","Japan":"頑張れ、日本！","Spain":"¡Mucha suerte, España!","Spanien":"¡Mucha suerte, España!","Iran":"موفق باشی، ایران!","Croatia":"Sretno, Hrvatska!","Kroatien":"Sretno, Hrvatska!"};
@@ -536,7 +545,11 @@ function renderView(){
   const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,crew:renderCrew,prizes:renderPrizes,rules:renderRules,admin:renderAdmin};
   view.innerHTML=tabMap[tab]();
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
-  document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderView();});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  tab = b.dataset.tab;
+  window.location.hash = tab; // <-- DIESE ZEILE HINZUFÜGEN (ändert die URL auf #tab-name)
+  renderView();
+});
 
   // Departures: save + round switcher
   const saveTipsBtn=document.getElementById("saveTips");
@@ -668,6 +681,16 @@ async function sendCabinLog() {
     document.getElementById("cabinLogModal").style.display = "none";
   }
 }
+// Reagiert auf Zurück/Vorwärts im Browser
+window.addEventListener("hashchange", () => {
+  const h = window.location.hash.replace("#", "");
+  if (validTabs.includes(h) && tab !== h) {
+    tab = h;
+    renderView();
+  }
+});
+
+loadAll(); // <-- Diese Zeile ist schon da
 
 loadAll();
 setInterval(tickCountdowns, 30000);
