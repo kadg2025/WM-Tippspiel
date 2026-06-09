@@ -229,7 +229,7 @@
 <script>
   const SUPABASE_URL = "https://dgjfydzjgokzigklgchj.supabase.co";
   const SUPABASE_KEY = "sb_publishable_mRkwbCEvlRcQL8wk3YSJ4g_6ceY3yUz";
-  const ADMIN_PW     = "WM2026";
+  const ADMIN_PW_B64 = "V00yMDI2"; // Base64-verschlüsseltes Passwort "WM2026"
   const TEAM_TITEL   = "World Cup Pool";
   const LOGO_URL     = "opsd-logo.png";
   const SCORE        = {
@@ -619,13 +619,16 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   if(saveBonusBtn) saveBonusBtn.onclick=saveBonus;
 
   // Control Tower: login
-  if(tab==="admin"&&!adminOK){
-    const b=document.getElementById("alogin");
-    if(b){
-      b.onclick=()=>{ if(document.getElementById("apw").value===ADMIN_PW){adminOK=true;renderView();} else toast("Wrong password"); };
-      document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
-    }
+// ... Innerhalb von renderView() ...
+if(tab==="admin"&&!adminOK){
+  const b=document.getElementById("alogin");
+  if(b){
+    b.onclick=()=>{ if(btoa(document.getElementById("apw").value)===ADMIN_PW_B64){adminOK=true;renderView();} else toast("Wrong password"); };
+    document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
   }
+}
+
+
 
   // Control Tower: admin actions
   if(tab==="admin"&&adminOK){
