@@ -515,33 +515,76 @@ function renderBonus(){
 async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
 function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td> <td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td> </tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function renderAirlineStandings(){
+  const t = totals();
+  if(!t.length) return "";
+  const byTail = {};
+  t.forEach(p=>{
+    const code = tailOf(p.name);
+    if(!byTail[code]) byTail[code] = {code, players:0, pts:0, exact:0, bonus:0};
+    const a = byTail[code];
+    a.players++; a.pts += p.pts; a.exact += p.exact; a.bonus += p.bonus;
+  });
+  const rows = Object.values(byTail).sort((x,y)=> y.pts-x.pts || y.exact-x.exact || y.players-x.players || x.code.localeCompare(y.code));
+  if(!rows.length) return "";
+  const trs = rows.map((a,i)=>`<tr><td class="rank ${i<3?("p"+(i+1)):""}">${i+1}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(a.code,24)}<span>${esc(TAIL_LABEL[a.code]||a.code)} <span style="color:var(--mut);font-weight:600;font-size:13px">· ${a.players}</span></span></span></td><td class="stat num">${a.exact}</td><td class="stat num">${a.pts - a.bonus}</td><td class="stat num">${a.bonus}</td><td class="total num">${a.pts}</td></tr>`).join("");
+  return `<h3 style="font-family:'Anton',sans-serif;font-size:17px;letter-spacing:.3px;margin:4px 4px 4px">✈️ Airline Cup</h3><div style="color:var(--mut);font-size:13px;margin:0 4px 10px;line-height:1.5">Jede Airline sammelt die Punkte ihrer Crew — welche Flotte fliegt am höchsten?</div><table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Airline · Crew</th><th class="stat-h">Hits</th><th class="stat-h">Points</th><th class="stat-h">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${trs}</tbody></table>`;
+}
+
 function renderCrew(){
   const players=[...new Set([...tips.map(t=>t.player),...bonusAnswers.map(a=>a.player)])];
   const card=(medal,title,winner,sub,tailCode)=>`<div class="prize"><div class="pmedal">${medal}</div><div class="pinfo"><div class="pplace">${esc(title)}</div><div class="pwin" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${winner&&tailCode?tailHTML(tailCode,22):""}<span>${winner?esc(winner):"—"}${sub?` · ${esc(sub)}`:""}</span></div></div></div>`;
   if(!players.length) return `<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks. They appear as soon as the crew starts boarding — no predictions in yet.</div></div>`;
 
-  // 🏆 Crowd Favourite — most-tipped World Cup winner
+  const t=totals();
+  const scored = matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved);
+  const fin=matches.filter(m=>m.finished);
+  const sgn=x=>x>0?1:(x<0?-1:0);
+
+  const cap=(t.length&&scored)?t[0]:null;
+
   const winQ=bonusQs.find(q=>/win the world cup/i.test(q.question))||bonusQs.find(q=>q.sort_order===1);
   let crowd=null;
-  if(winQ){ const c={}; bonusAnswers.filter(a=>a.question_id===winQ.id).forEach(a=>{const k=(a.answer||"").trim(); if(k)c[k]=(c[k]||0)+1;}); const top=Object.entries(c).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0]))[0]; const tot=Object.values(c).reduce((s,v)=>s+v,0); if(top) crowd={team:top[0],n:top[1],tot}; }
+  if(winQ){ const c={}; bonusAnswers.filter(a=>a.question_id===winQ.id).forEach(a=>{const k=(a.answer||"").trim();if(k)c[k]=(c[k]||0)+1;}); const top=Object.entries(c).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0]))[0]; const tot=Object.values(c).reduce((s,v)=>s+v,0); if(top) crowd={team:top[0],n:top[1],tot}; }
 
-  // 🌪️ Turbulence Seeker — highest average total goals per pick
+  let freq=null;
+  players.forEach(name=>{ const n=tips.filter(x=>x.player===name).length; if(n>0&&(!freq||n>freq.n)) freq={name,n}; });
+
+  let draw=null;
+  players.forEach(name=>{ const n=tips.filter(x=>x.player===name&&x.home_tip!=null&&+x.home_tip===+x.away_tip).length; if(n>0&&(!draw||n>draw.n)) draw={name,n}; });
+
+  let sky=null;
+  const scorerQ=bonusQs.find(q=>/top scorer/i.test(q.question)&&q.qtype==="number")||bonusQs.find(q=>q.qtype==="number");
+  if(scorerQ){ bonusAnswers.filter(a=>a.question_id===scorerQ.id).forEach(a=>{ const v=parseFloat(a.answer); if(!isNaN(v)&&(!sky||v>sky.v)) sky={name:a.player,v}; }); }
+
   let turb=null;
-  players.forEach(name=>{ const ps=tips.filter(t=>t.player===name&&t.home_tip!=null); if(ps.length){ const avg=ps.reduce((s,t)=>s+(+t.home_tip+ +t.away_tip),0)/ps.length; if(!turb||avg>turb.avg) turb={name,avg,n:ps.length}; } });
+  players.forEach(name=>{ const ps=tips.filter(x=>x.player===name&&x.home_tip!=null); if(ps.length){ const avg=ps.reduce((s,x)=>s+(+x.home_tip+ +x.away_tip),0)/ps.length; if(!turb||avg>turb.avg) turb={name,avg}; } });
 
-  // 🛩️ Autopilot — longest streak of point-scoring tips (chronological, finished matches)
-  const fin=matches.filter(m=>m.finished).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  let greaser=null;
+  t.forEach(p=>{ if(p.exact>0&&(!greaser||p.exact>greaser.exact)) greaser={name:p.name,exact:p.exact}; });
+
+  let go=null;
+  players.forEach(name=>{ let n=0; fin.forEach(m=>{ const tp=tips.find(x=>x.player===name&&x.match_id===m.id); if(!tp||tp.home_tip==null) return; const ph=+tp.home_tip,pa=+tp.away_tip,rh=+m.home_score,ra=+m.away_score; if(sgn(ph-pa)===sgn(rh-ra)&&(Math.abs(ph-rh)+Math.abs(pa-ra))===1) n++; }); if(n>0&&(!go||n>go.n)) go={name,n}; });
+
+  let dayCap=null;
+  if(fin.length){ players.forEach(name=>{ const byDay={}; fin.forEach(m=>{ const tp=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(tp,m); if(s!=null){ const d=m.match_date||"?"; byDay[d]=(byDay[d]||0)+s; } }); const best=Math.max(0,...Object.values(byDay)); if(best>0&&(!dayCap||best>dayCap.pts)) dayCap={name,pts:best}; }); }
+
+  const finSorted=fin.slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   let auto=null;
-  players.forEach(name=>{ let cur=0,best=0; fin.forEach(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(t,m); if(s!=null&&s>0){cur++;best=Math.max(best,cur);}else{cur=0;} }); if(best>0&&(!auto||best>auto.best)) auto={name,best}; });
-
-  // 🧑‍✈️ Captain — current leader
-  const t=totals(); const cap=(t.length&&(matches.some(m=>m.finished)||bonusQs.some(q=>q.resolved)))?t[0]:null;
+  players.forEach(name=>{ let cur=0,best=0; finSorted.forEach(m=>{ const tp=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(tp,m); if(s!=null&&s>0){cur++;best=Math.max(best,cur);}else{cur=0;} }); if(best>0&&(!auto||best>auto.best)) auto={name,best}; });
 
   let html=`<div class="rcard"><h3>OPSD Crew Lounge ✈️</h3><div class="lead">Fun team stats from everyone's picks — just for bragging rights. They fill in as more predictions and results come in.</div></div>`;
+  html+=renderAirlineStandings();
   html+=card("🧑‍✈️","Captain (current #1)", cap?cap.name:null, cap?`${cap.pts} pts`:"no scores yet", cap?tailOf(cap.name):null);
   html+=card("🏆","Crowd Favourite", crowd?crowd.team:null, crowd?`backed by ${crowd.n}/${crowd.tot}`:"no winner picks yet", null);
+  html+=card("✈️","Frequent Flyer", freq?freq.name:null, freq?`${freq.n} tips submitted`:"no tips yet", freq?tailOf(freq.name):null);
+  html+=card("🔁","Holding Pattern", draw?draw.name:null, draw?`${draw.n} draws predicted`:"no draws yet", draw?tailOf(draw.name):null);
+  html+=card("🚀","Sky's the Limit", sky?sky.name:null, sky?`top scorer for ${sky.v} goals`:"no bonus answers yet", sky?tailOf(sky.name):null);
   html+=card("🌪️","Turbulence Seeker", turb?turb.name:null, turb?`${turb.avg.toFixed(1)} goals/match on average`:"no picks yet", turb?tailOf(turb.name):null);
-  html+=card("🛩️","Autopilot (longest hot streak)", auto?auto.name:null, auto?`${auto.best} scoring tips in a row`:"fills once matches are scored", auto?tailOf(auto.name):null);
+  html+=card("🎯","Greaser (most exact)", greaser?greaser.name:null, greaser?`${greaser.exact} perfect landings`:"fills once matches are scored", greaser?tailOf(greaser.name):null);
+  html+=card("😬","Go-Around (so close!)", go?go.name:null, go?`${go.n}× just 1 goal off`:"fills once matches are scored", go?tailOf(go.name):null);
+  html+=card("📅","Day Captain", dayCap?dayCap.name:null, dayCap?`${dayCap.pts} pts in one matchday`:"fills once matches are scored", dayCap?tailOf(dayCap.name):null);
+  html+=card("🛩️","Autopilot (hot streak)", auto?auto.name:null, auto?`${auto.best} scoring tips in a row`:"fills once matches are scored", auto?tailOf(auto.name):null);
   return html;
 }
 function renderRules(){ const g=SCORE.group,k=SCORE.knockout; return `<div class="rcard"><h3>How it works ✈️</h3><div class="lead">Two deadlines — don't mix them up:</div><div class="rrow"><span class="pp">✈️</span><span><b>Upgrades</b> (bonus questions): answer them <b>all once, before the very first match</b> of the tournament kicks off. After that they lock for good.</span></div><div class="rrow"><span class="pp">🛫</span><span><b>Departures</b> (match scores): predicted <b>one match at a time</b> — each game locks <b>5 min before its own kickoff</b>, so keep coming back all tournament long.</span></div><div class="rrow"><span class="pp">🍫</span><span>Points stack up on the <b>Flight Deck</b>; the top 3 win SWISS Schoki (see <b>Cargo</b>).</span></div></div><div class="rcard"><h3>Good to know 👍</h3><div class="lead">A few details that win — or cost — you points.</div><div class="rrow"><span class="pp">🥅</span><span>For knockout games, predict the score <b>after 120 minutes</b> (extra time counts, penalty-shootout goals do <b>not</b>). A 1:1 thriller that goes to penalties is scored as 1:1.</span></div> <div class="rrow"><span class="pp">🧑</span><span>Enter your name to play — and write it the same way every time. Capitalization doesn't matter (andreas = Andreas = ANDREAS), but spelling does: "Andi", "Andreas" and "Andreas M." are three different humans to the Flight Deck.</span></div> </div><div class="rcard"><h3>Points · Group stage</h3><div class="lead">Only the single best tier counts — no stacking. First the outcome (home win / draw / away win) must be right, otherwise 0.</div><div class="rrow"><span class="pp">${g.exact} pts</span><span>🎯 <b>Exact score.</b></span></div><div class="rrow"><span class="pp">${g.diff} pts</span><span>➖ Right winner <b>and</b> right goal difference — e.g. you tip 3:2 and it ends 2:1. <b>Draw:</b> a draw one goal off (0:0 or 2:2 for a 1:1).</span></div><div class="rrow"><span class="pp">${g.tendency} pts</span><span>✅ Right winner only, wrong margin. <b>Draw:</b> a draw further off (3:3 for a 1:1).</span></div><div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Group"})} points.</div></div><div class="rcard"><h3>Points · Knockout stage</h3><div class="lead">Same idea, double the drama — every tier is worth twice as much (scored after 120').</div><div class="rrow ko"><span class="pp">${k.exact} pts</span><span>🎯 Exact score.</span></div><div class="rrow ko"><span class="pp">${k.diff} pts</span><span>➖ Right winner + right goal difference (draw: one goal off).</span></div><div class="rrow ko"><span class="pp">${k.tendency} pts</span><span>✅ Right winner only (draw: further off).</span></div><div class="rmax">🎯 Nail the exact score = ${maxPts({phase:"Knockout"})} points.</div></div></div>`; }
