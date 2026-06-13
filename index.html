@@ -221,6 +221,16 @@
     gap: 6px;
     margin-top: 8px;
   }
+/* --- NEU: Rank-Badge + einklappbare Tage --- */
+  .trank{font-size:10.5px;font-weight:800;color:var(--mut);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 5px;flex:0 0 auto;font-variant-numeric:tabular-nums}
+  .day-fold{margin:16px 0 8px;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+  .day-fold>summary{list-style:none;cursor:pointer;padding:11px 14px;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+  .day-fold>summary::-webkit-details-marker{display:none}
+  .day-fold>summary::before{content:"▸";font-size:13px;transition:transform .2s}
+  .day-fold[open]>summary::before{transform:rotate(90deg)}
+  .day-fold[open]>summary{border-bottom:1px solid var(--line)}
+  .day-cnt{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:.2px;color:var(--mut)}
+  .day-fold-body{padding:12px 12px 2px}
 
 </style>
 </head>
@@ -435,7 +445,17 @@ function renderMe(){ const bar=$("#meBar");
 }
 function allPicksHTML(matchId,rHome,rAway,finished){ const mt=tips.filter(t=>t.match_id===matchId); if(!mt.length) return '<div class="all-picks"><span style="font-size:12px;color:var(--mut)">No picks yet</span></div>'; const chips=mt.map(t=>{ const isMe=t.player===me; let cls="pick-chip"; if(finished&&rHome!=null){ const exact=+t.home_tip===+rHome&&+t.away_tip===+rAway; const good=!exact&&Math.sign(+t.home_tip-+t.away_tip)===Math.sign(+rHome-+rAway); if(exact) cls+=" exact"; else if(good) cls+=" good"; } if(isMe) cls+=" me"; return `<span class="${cls}">${esc(t.player)} ${t.home_tip}:${t.away_tip}</span>`; }).join(""); return `<div class="all-picks">${chips}</div>`; }
 function toggleReveal(id,btn){ const el=document.getElementById('rev-'+id); if(!el) return; const hidden=el.style.display==="none"; el.style.display=hidden?"block":"none"; btn.textContent=hidden?"👀 Hide picks":"👀 Show all picks"; }
-function matchCard(m){ const pick=myPick(m.id)||{}; const closed=isClosed(m); const cd=getCountdownHtml(m); const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`; if(m.finished){ const s=scoreOf(pick,m),has=pick.home_tip!=null; return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}</div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`; } const dis=closed?"disabled":""; const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:""; return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}${rankBadge(m.home)}</div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}${revealSection}</div>`; }
+function matchCard(m){
+  const pick=myPick(m.id)||{}; const closed=isClosed(m); const cd=getCountdownHtml(m);
+  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`;
+  if(m.finished){
+    const s=scoreOf(pick,m),has=pick.home_tip!=null;
+    return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`;
+  }
+  const dis=closed?"disabled":"";
+  const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:"";
+  return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}${revealSection}</div>`;
+}
 function nextKickoff(){ const future=matches.filter(m=>m.kickoff && !m.finished).map(m=>({m,t:new Date(m.kickoff).getTime()})).filter(x=>!isNaN(x.t)&&x.t>Date.now()).sort((a,b)=>a.t-b.t); if(!future.length) return null; return future[0]; }
 function fmtCountdown(ms){ if(ms<0) ms=0; const totalMin=Math.floor(ms/60000); const d=Math.floor(totalMin/1440); const h=Math.floor((totalMin%1440)/60); const mi=totalMin%60; if(d>0) return `${d}d ${h}h`; if(h>0) return `${h}h ${String(mi).padStart(2,"0")}m`; return `${mi}m`; }
 function countdownLine(){ const nk=nextKickoff(); if(!nk) return ""; const diff=nk.t-Date.now(); const h=Math.floor(diff/3600000); const mm=Math.floor((diff%3600000)/60000); const hh=String(h).padStart(2,"0"); const mi=String(mm).padStart(2,"0"); return `<div class="livebar"><span class="livechip"><span class="dot"></span>Nächster Abflug in ${hh}:${mi} h</span></div>`; }
@@ -502,12 +522,20 @@ function renderTip(){
   
   let html=""; 
   days.forEach(d=>{ 
-    html+=`<div class="day">${esc(d.date)}</div>`; 
-    d.ms.forEach(m=>{html+=matchCard(m);}); 
-    if(d.ms.some(m=>!isClosed(m))) {
-      html+=`<button class="btn js-savetips" style="width:100%;padding:13px;margin:4px 0 18px">Save predictions</button>`; 
+    const dayDone = d.ms.length>0 && d.ms.every(m=>m.finished);
+    if(dayDone){
+      html+=`<details class="day-fold"><summary>✅ ${esc(d.date)}<span class="day-cnt">${d.ms.length} ${d.ms.length===1?"game":"games"} · done</span></summary><div class="day-fold-body">`;
+      d.ms.forEach(m=>{html+=matchCard(m);});
+      html+=`</div></details>`;
+    } else {
+      html+=`<div class="day">${esc(d.date)}</div>`; 
+      d.ms.forEach(m=>{html+=matchCard(m);}); 
+      if(d.ms.some(m=>!isClosed(m))) {
+        html+=`<button class="btn js-savetips" style="width:100%;padding:13px;margin:4px 0 18px">Save predictions</button>`; 
+      }
     }
-  }); 
+  });
+  
   
   return meBarHTML + (hasRounds ? nav : "") + renderOpsLine() + statusBar + html; 
 }
