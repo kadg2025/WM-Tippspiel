@@ -419,7 +419,25 @@ function bonusEarned(q,player){ if(!q.resolved||q.correct==null||q.correct==="")
 function todayKey(d=new Date()){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function matchDateKey(m){ if(m&&m.kickoff){ const d=new Date(m.kickoff); if(!isNaN(d)) return todayKey(d); } return null; }
 function todaysMatches(){ const key=todayKey(); return matches.filter(m=>matchDateKey(m)===key); }
-function autoOpsNews(){ const today=todaysMatches(); for(const m of today){ const msg=OPS_TEAM_MESSAGES[m.home]||OPS_TEAM_MESSAGES[m.away]; if(msg) return msg; } const openToday=today.filter(m=>!isClosed(m)); if(openToday.length===1){ const m=openToday[0]; return `${m.home} vs. ${m.away} tonight — predictions are open.`; } if(openToday.length>1){ return `${openToday.length} matches on today's board — don't miss the cutoff.`; } const scored=matches.filter(m=>m.finished).length; if(scored>0) return `Flight Deck live: ${scored} scored match${scored===1?"":"es"} already counted.`; return ""; }
+function autoOpsNews(){
+  const today=todaysMatches();
+  // Grüße für alle heute spielenden Teams, deren Spiel noch nicht fertig ist (mehrsprachig, fällt nach Abpfiff raus)
+  const greets=[]; const seen=new Set();
+  today.filter(m=>!m.finished).forEach(m=>{
+    [m.home,m.away].forEach(team=>{
+      const msg=OPS_TEAM_MESSAGES[team];
+      if(msg && !seen.has(msg)){ seen.add(msg); greets.push(msg); }
+    });
+  });
+  if(greets.length) return greets.join("  ·  ");
+  // Fallbacks (unverändert)
+  const openToday=today.filter(m=>!isClosed(m));
+  if(openToday.length===1){ const m=openToday[0]; return `${m.home} vs. ${m.away} tonight — predictions are open.`; }
+  if(openToday.length>1){ return `${openToday.length} matches on today's board — don't miss the cutoff.`; }
+  const scored=matches.filter(m=>m.finished).length;
+  if(scored>0) return `Flight Deck live: ${scored} scored match${scored===1?"":"es"} already counted.`;
+  return "";
+}
 function currentOpsNews(){ if(opsNewsMode==="custom"&&opsNewsCustom.trim()) return opsNewsCustom.trim(); if(opsNewsMode==="preset"&&opsNewsPreset.trim()) return opsNewsPreset.trim(); return autoOpsNews(); }
 function renderOpsLine(){ const msg=currentOpsNews(); return msg?`<div class="opsline"><span class="label">OPS news</span>${esc(msg)}</div>`:""; }
 function totals(){ const players=new Set(); tips.forEach(t=>players.add(t.player)); bonusAnswers.forEach(a=>players.add(a.player)); return [...players].map(name=>{ let pts=0,exact=0,bonus=0; tips.filter(t=>t.player===name).forEach(t=>{ const m=matches.find(x=>x.id===t.match_id); const s=scoreOf(t,m); if(s!=null){pts+=s;if(isExactHit(t,m))exact++;} }); bonusQs.forEach(q=>{const e=bonusEarned(q,name);if(e){pts+=e;bonus+=e;}}); return {name,pts,exact,bonus}; }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name)); }
