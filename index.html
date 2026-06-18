@@ -228,6 +228,23 @@
   .day-fold[open]>summary{border-bottom:1px solid var(--line)}
   .day-cnt{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:.2px;color:var(--mut)}
   .day-fold-body{padding:12px 12px 2px}
+  /* --- Group standings table --- */
+  .gtable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
+  .gtable th,.gtable td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:center;font-size:13px}
+  .gtable th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);background:#fafbfb;font-weight:800}
+  .gtable tr:last-child td{border-bottom:0}
+  .gtable td.gt-pos{width:22px;color:var(--mut);font-weight:800}
+  .gtable td.gt-team{text-align:left;font-weight:700;width:100%;max-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gtable td.gt-team .flag{vertical-align:middle;margin-right:6px}
+  .gtable td.gt-pts{font-weight:800}
+  .gtable tr.qual td.gt-pos{color:var(--green)}
+  .gres-wrap{margin-top:12px}
+  .gres{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+  .gres:last-child{border-bottom:0}
+  .gres-t{display:flex;align-items:center;gap:6px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gres-t.h{justify-content:flex-end;text-align:right}
+  .gres-s{text-align:center;min-width:62px;color:var(--mut);font-size:12px}
+  .gres-s b{font-size:15px;color:var(--ink)}
 
 </style>
 </head>
@@ -397,7 +414,7 @@ const urlHash = window.location.hash.replace("#", "");
 let tab = validTabs.includes(urlHash) ? urlHash : "tip";
 // ----------------------------------------
 
-let adminOK=false,tipRound="Round 1",_lastRank1=null;
+let adminOK=false,tipRound="Round 1",_lastRank1=null,tableGroup="A",_roundInit=false;
 
 let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
 const OPS_PRESETS=["Boarding call: predictions for the day are open.","Final boarding reminder: predictions close 5 minutes before kickoff.","Flight Deck update: every scored match can reshuffle the leaderboard.","Prize cargo check: SWISS Schoki is waiting for the top 3.","Control Tower note: one sharp prediction can change everything."];
@@ -421,16 +438,11 @@ function matchDateKey(m){ if(m&&m.kickoff){ const d=new Date(m.kickoff); if(!isN
 function todaysMatches(){ const key=todayKey(); return matches.filter(m=>matchDateKey(m)===key); }
 function autoOpsNews(){
   const today=todaysMatches();
-  // Grüße für alle heute spielenden Teams, deren Spiel noch nicht fertig ist (mehrsprachig, fällt nach Abpfiff raus)
   const greets=[]; const seen=new Set();
   today.filter(m=>!m.finished).forEach(m=>{
-    [m.home,m.away].forEach(team=>{
-      const msg=OPS_TEAM_MESSAGES[team];
-      if(msg && !seen.has(msg)){ seen.add(msg); greets.push(msg); }
-    });
+    [m.home,m.away].forEach(team=>{ const msg=OPS_TEAM_MESSAGES[team]; if(msg && !seen.has(msg)){ seen.add(msg); greets.push(msg); } });
   });
   if(greets.length) return greets.join("  ·  ");
-  // Fallbacks (unverändert)
   const openToday=today.filter(m=>!isClosed(m));
   if(openToday.length===1){ const m=openToday[0]; return `${m.home} vs. ${m.away} tonight — predictions are open.`; }
   if(openToday.length>1){ return `${openToday.length} matches on today's board — don't miss the cutoff.`; }
@@ -491,7 +503,12 @@ function renderTip(){
   const hasRounds=rounds.length>0; 
   const koMatches=matches.filter(m=>m.phase!=="Group"); 
   if(koMatches.length) rounds.push("Knockout"); 
-  if(hasRounds&&!rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
+  if(hasRounds && tipRound!=="Table" && !rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
+  if(!_roundInit){
+    _roundInit=true;
+    const firstOpen=rounds.find(r=>{ const rm=r==="Knockout"?koMatches:matches.filter(m=>m.round===r); return rm.some(m=>!isClosed(m)); });
+    tipRound = firstOpen || rounds[0] || "Round 1";
+  }
 
   function roundDot(rnd){ 
     const rm=rnd==="Knockout"?koMatches:matches.filter(m=>m.round===rnd); 
@@ -504,10 +521,13 @@ function renderTip(){
   } 
   
   let nav=`<div class="round-nav" id="roundNav">`; 
+  nav+=`<button class="${tipRound==="Table"?"on":""}" data-rnd="Table">📊 Table</button>`;
   rounds.forEach(r=>{ 
     nav+=`<button class="${r===tipRound?"on":""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${roundDot(r)}"></span>${esc(r)}</button>`; 
   }); 
   nav+=`</div>`; 
+
+  if(tipRound==="Table") return meBarHTML + nav + renderGroupTable();
 
   const visible=tipRound==="Knockout"?koMatches:matches.filter(m=>m.round===tipRound); 
   const fallback=!hasRounds?matches:visible; 
@@ -563,6 +583,41 @@ function renderBonus(){
 async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
 function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function groupStandings(grp){
+  const teams={};
+  const ensure=t=>{ if(!teams[t]) teams[t]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,Pts:0}; return teams[t]; };
+  matches.filter(m=>m.phase==="Group"&&(m.grp||"")===grp).forEach(m=>{
+    ensure(m.home); ensure(m.away);
+    if(!m.finished||m.home_score==null||m.away_score==null) return;
+    const h=teams[m.home], a=teams[m.away], hs=+m.home_score, as=+m.away_score;
+    h.P++; a.P++; h.GF+=hs; h.GA+=as; a.GF+=as; a.GA+=hs;
+    if(hs>as){ h.W++; a.L++; h.Pts+=3; }
+    else if(hs<as){ a.W++; h.L++; a.Pts+=3; }
+    else { h.D++; a.D++; h.Pts++; a.Pts++; }
+  });
+  return Object.values(teams).map(t=>({...t,GD:t.GF-t.GA}))
+    .sort((x,y)=> y.Pts-x.Pts || y.GD-x.GD || y.GF-x.GF || x.team.localeCompare(y.team));
+}
+function groupResultsHTML(grp){
+  const ms=matches.filter(m=>m.phase==="Group"&&(m.grp||"")===grp).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  if(!ms.length) return "";
+  const rows=ms.map(m=>{
+    const mid=m.finished&&m.home_score!=null ? `<b class="num">${m.home_score} : ${m.away_score}</b>` : `${esc(m.match_date)}<br>${esc(m.match_time)}`;
+    return `<div class="gres"><div class="gres-t h"><span class="tname">${esc(m.home)}</span>${flagHTML(m.home)}</div><div class="gres-s">${mid}</div><div class="gres-t">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>`;
+  }).join("");
+  return `<div class="gres-wrap"><div class="day" style="margin:14px 4px 6px">Results · Group ${esc(grp)}</div>${rows}</div>`;
+}
+function renderGroupTable(){
+  const grps=[...new Set(matches.filter(m=>m.phase==="Group").map(m=>m.grp).filter(Boolean))].sort();
+  if(!grps.length) return `<div class="empty">No group matches yet.</div>`;
+  if(!grps.includes(tableGroup)) tableGroup=grps[0];
+  let nav=`<div class="round-nav" style="margin-bottom:12px">`;
+  grps.forEach(g=>{ nav+=`<button class="${g===tableGroup?"on":""}" data-grp="${esc(g)}">Group ${esc(g)}</button>`; });
+  nav+=`</div>`;
+  const rows=groupStandings(tableGroup).map((t,i)=>`<tr class="${i<2?"qual":""}"><td class="gt-pos">${i+1}</td><td class="gt-team">${flagHTML(t.team)}<span>${esc(t.team)}</span></td><td>${t.P}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GD>0?"+":""}${t.GD}</td><td class="gt-pts">${t.Pts}</td></tr>`).join("");
+  const table=`<table class="gtable"><thead><tr><th></th><th style="text-align:left">Team</th><th title="Played">P</th><th title="Won">W</th><th title="Drawn">D</th><th title="Lost">L</th><th title="Goal difference">GD</th><th title="Points">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return nav + table + groupResultsHTML(tableGroup);
+}
 function renderAirlineStandings() {
   const t = totals();
   if (!t.length) return "";
@@ -777,6 +832,7 @@ function renderView(){
   if(saveTipsBtn) saveTipsBtn.onclick=saveTips;
   document.querySelectorAll(".js-savetips").forEach(b=>b.onclick=saveTips);
   document.querySelectorAll("[data-rnd]").forEach(btn=>btn.onclick=()=>{tipRound=btn.dataset.rnd;renderView();});
+  document.querySelectorAll("[data-grp]").forEach(btn=>btn.onclick=()=>{tableGroup=btn.dataset.grp;renderView();});
 
   // Upgrades: save
   const saveBonusBtn=document.getElementById("saveBonus");
