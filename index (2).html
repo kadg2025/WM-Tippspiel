@@ -51,6 +51,7 @@
   .flag{width:28px;height:21px;object-fit:cover;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.1);display:block;flex:0 0 auto}
   .flag-emoji{font-size:22px}
   .tname{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trank{font-size:10.5px;font-weight:800;color:var(--mut);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 5px;flex:0 0 auto;font-variant-numeric:tabular-nums}
   .score{display:flex;align-items:center;gap:6px}
   .score input{width:42px;height:42px;text-align:center;font-size:18px;font-weight:700;border:1.5px solid var(--line);border-radius:10px;-moz-appearance:textfield}
   .score input::-webkit-outer-spin-button,.score input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -86,7 +87,6 @@
   table.rank-table col.col-bonus{width:54px}
   table.rank-table col.col-total{width:62px}
   table.rank-table th,table.rank-table td{padding:13px 7px;border-bottom:1px solid var(--line);vertical-align:middle}
-  table.rank-table th,table.rank-table td{padding:16px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
   table.rank-table th{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);background:#fafbfb;font-weight:800}
   table.rank-table tr:last-child td{border-bottom:0}
   table.rank-table th.rank-h,table.rank-table td.rank{text-align:left}
@@ -160,10 +160,10 @@
   .cd-chip{display:inline-block;background:#eef1fb;color:var(--accent);border:1px solid #d7ddf5;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800;letter-spacing:.2px;white-space:nowrap}
   .tailopt{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:3px;cursor:pointer;line-height:0;display:inline-flex}
   .tailopt.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(25,25,75,.18)}
-    /* Schwebender Cabin-Log-Button unten rechts (Lufthansa Blau) */
+  /* Cabin-Log-Button (Lufthansa Blau) – steht jetzt im Footer, nicht mehr schwebend */
   .cabin-log-btn {
-    background: #002F6C; /* Exaktes Lufthansa-Blau */
-    color: #ffffff; /* Weisser Text */
+    background: #002F6C;
+    color: #ffffff;
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 30px;
     padding: 10px 18px;
@@ -177,13 +177,12 @@
     transition: transform 0.2s, background-color 0.2s;
   }
   .cabin-log-btn:hover {
-    background: #00204a; /* Etwas dunkleres Blau beim Drüberfahren */
+    background: #00204a;
     transform: scale(1.05);
   }
-
-  /* Kleines Feedback-Popup-Fenster direkt über dem Button */
+  /* Kleines Feedback-Popup-Fenster */
   .cabin-log-popup {
-    display: none; /* Am Anfang unsichtbar */
+    display: none;
     position: fixed;
     bottom: 70px;
     right: 20px;
@@ -220,6 +219,32 @@
     gap: 6px;
     margin-top: 8px;
   }
+  /* --- Rank-Badge ist oben bei .tname definiert. Hier: einklappbare Tage --- */
+  .day-fold{margin:16px 0 8px;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+  .day-fold>summary{list-style:none;cursor:pointer;padding:11px 14px;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+  .day-fold>summary::-webkit-details-marker{display:none}
+  .day-fold>summary::before{content:"▸";font-size:13px;transition:transform .2s}
+  .day-fold[open]>summary::before{transform:rotate(90deg)}
+  .day-fold[open]>summary{border-bottom:1px solid var(--line)}
+  .day-cnt{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:.2px;color:var(--mut)}
+  .day-fold-body{padding:12px 12px 2px}
+  /* --- Group standings table --- */
+  .gtable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
+  .gtable th,.gtable td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:center;font-size:13px}
+  .gtable th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);background:#fafbfb;font-weight:800}
+  .gtable tr:last-child td{border-bottom:0}
+  .gtable td.gt-pos{width:22px;color:var(--mut);font-weight:800}
+  .gtable td.gt-team{text-align:left;font-weight:700;width:100%;max-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gtable td.gt-team .flag{vertical-align:middle;margin-right:6px}
+  .gtable td.gt-pts{font-weight:800}
+  .gtable tr.qual td.gt-pos{color:var(--green)}
+  .gres-wrap{margin-top:12px}
+  .gres{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+  .gres:last-child{border-bottom:0}
+  .gres-t{display:flex;align-items:center;gap:6px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gres-t.h{justify-content:flex-end;text-align:right}
+  .gres-s{text-align:center;min-width:62px;color:var(--mut);font-size:12px}
+  .gres-s b{font-size:15px;color:var(--ink)}
 
 </style>
 </head>
@@ -328,6 +353,7 @@ const TAIL_MOTIF = {
 const TAIL_LABEL={NEUTRAL:"✈ Neutral",LX:"Swiss (LX)",LH:"Lufthansa (LH)",EW:"Eurowings (EW)",OS:"Austrian (OS)",SN:"Brussels (SN)",AZ:"ITA (AZ)",WK:"Edelweiss (WK)",EN:"Air Dolomiti (EN)","4Y":"Discover (4Y)",LHC:"Lufthansa Cargo",DEV:"Dev </>"};
 const TAIL_ORDER = ["DEV", "LX", "LH", "EW", "AZ", "SN", "OS", "WK", "EN", "4Y", "LHC", "NEUTRAL"];
 const FIN = "M 6,28 L 18.5,4.5 C 19,3 21,3 21.5,4.5 L 21.5,28 C 21.5,29 20.8,29.5 19.8,29.5 L 7.5,29.5 C 6.5,29.5 5.8,29 6,28 Z";
+
 function tailSVG(code, size) {
   size = size || 24;
   const c = TAIL_FILL[code] ? code : "NEUTRAL";
@@ -361,7 +387,18 @@ function tailSVG(code, size) {
     </svg>`;
 }
 
-
+// FIFA-Weltrangliste — offizieller Stand 11. Juni 2026 (vor dem Turnier). Bewusst eingefroren.
+const RANK = {
+  "Argentina":1,"Spain":2,"France":3,"England":4,"Portugal":5,"Brazil":6,"Morocco":7,
+  "Netherlands":8,"Belgium":9,"Germany":10,"Croatia":11,"Colombia":13,"Mexico":14,
+  "Senegal":15,"Uruguay":16,"USA":17,"Japan":18,"Switzerland":19,"Iran":20,"Türkiye":22,
+  "Ecuador":23,"Austria":24,"South Korea":25,"Australia":27,"Algeria":28,"Egypt":29,
+  "Canada":30,"Norway":31,"Ivory Coast":33,"Panama":34,"Sweden":38,"Czechia":40,
+  "Paraguay":41,"Scotland":42,"Tunisia":45,"DR Congo":46,"Uzbekistan":50,"Qatar":56,
+  "Iraq":57,"South Africa":60,"Saudi Arabia":61,"Jordan":63,"Bosnia-Herzegovina":64,
+  "Cape Verde":67,"Ghana":73,"Curaçao":82,"Haiti":83,"New Zealand":85
+};
+function rankBadge(team){ const r=RANK[(team||"").trim()]; return r?`<span class="trank">#${r}</span>`:""; }
 function tailHTML(code,size){ size=size||24; const c=TAIL_FILL[code]?code:"NEUTRAL"; return `<span style="display:inline-flex;width:${size}px;height:${size}px;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto"><img src="tails/${c}.png" width="${size}" height="${size}" alt="" style="display:none;object-fit:contain" onload="this.style.display='inline-block';var s=this.nextElementSibling;if(s)s.style.display='none'" onerror="this.remove()">${tailSVG(c,size)}</span>`; }
 function tailOf(name){ const p=players.find(x=>x.name===name); return (p&&p.tail&&TAIL_FILL[p.tail])?p.tail:"NEUTRAL"; }
 const $=s=>document.querySelector(s);
@@ -371,13 +408,13 @@ const sb=(window.supabase && SUPABASE_URL.startsWith("http"))?window.supabase.cr
 const PRIZE_IMG="prize-schoki.jpg";
 let matches=[],tips=[],bonusQs=[],bonusAnswers=[],players=[];
 
-// --- HIER: Start-Tab aus URL auslesen ---
+// --- Start-Tab aus URL auslesen ---
 const validTabs = ["tip", "rules", "bonus", "rank", "crew", "prizes", "admin"];
 const urlHash = window.location.hash.replace("#", "");
 let tab = validTabs.includes(urlHash) ? urlHash : "tip";
 // ----------------------------------------
 
-let adminOK=false,tipRound="Round 1",_lastRank1=null;
+let adminOK=false,tipRound="Round 1",_lastRank1=null,tableGroup="A",_roundInit=false;
 
 let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
 const OPS_PRESETS=["Boarding call: predictions for the day are open.","Final boarding reminder: predictions close 5 minutes before kickoff.","Flight Deck update: every scored match can reshuffle the leaderboard.","Prize cargo check: SWISS Schoki is waiting for the top 3.","Control Tower note: one sharp prediction can change everything."];
@@ -399,12 +436,25 @@ function bonusEarned(q,player){ if(!q.resolved||q.correct==null||q.correct==="")
 function todayKey(d=new Date()){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function matchDateKey(m){ if(m&&m.kickoff){ const d=new Date(m.kickoff); if(!isNaN(d)) return todayKey(d); } return null; }
 function todaysMatches(){ const key=todayKey(); return matches.filter(m=>matchDateKey(m)===key); }
-function autoOpsNews(){ const today=todaysMatches(); for(const m of today){ const msg=OPS_TEAM_MESSAGES[m.home]||OPS_TEAM_MESSAGES[m.away]; if(msg) return msg; } const openToday=today.filter(m=>!isClosed(m)); if(openToday.length===1){ const m=openToday[0]; return `${m.home} vs. ${m.away} tonight — predictions are open.`; } if(openToday.length>1){ return `${openToday.length} matches on today's board — don't miss the cutoff.`; } const scored=matches.filter(m=>m.finished).length; if(scored>0) return `Flight Deck live: ${scored} scored match${scored===1?"":"es"} already counted.`; return ""; }
+function autoOpsNews(){
+  const today=todaysMatches();
+  const greets=[]; const seen=new Set();
+  today.filter(m=>!m.finished).forEach(m=>{
+    [m.home,m.away].forEach(team=>{ const msg=OPS_TEAM_MESSAGES[team]; if(msg && !seen.has(msg)){ seen.add(msg); greets.push(msg); } });
+  });
+  if(greets.length) return greets.join("  ·  ");
+  const openToday=today.filter(m=>!isClosed(m));
+  if(openToday.length===1){ const m=openToday[0]; return `${m.home} vs. ${m.away} tonight — predictions are open.`; }
+  if(openToday.length>1){ return `${openToday.length} matches on today's board — don't miss the cutoff.`; }
+  const scored=matches.filter(m=>m.finished).length;
+  if(scored>0) return `Flight Deck live: ${scored} scored match${scored===1?"":"es"} already counted.`;
+  return "";
+}
 function currentOpsNews(){ if(opsNewsMode==="custom"&&opsNewsCustom.trim()) return opsNewsCustom.trim(); if(opsNewsMode==="preset"&&opsNewsPreset.trim()) return opsNewsPreset.trim(); return autoOpsNews(); }
 function renderOpsLine(){ const msg=currentOpsNews(); return msg?`<div class="opsline"><span class="label">OPS news</span>${esc(msg)}</div>`:""; }
 function totals(){ const players=new Set(); tips.forEach(t=>players.add(t.player)); bonusAnswers.forEach(a=>players.add(a.player)); return [...players].map(name=>{ let pts=0,exact=0,bonus=0; tips.filter(t=>t.player===name).forEach(t=>{ const m=matches.find(x=>x.id===t.match_id); const s=scoreOf(t,m); if(s!=null){pts+=s;if(isExactHit(t,m))exact++;} }); bonusQs.forEach(q=>{const e=bonusEarned(q,name);if(e){pts+=e;bonus+=e;}}); return {name,pts,exact,bonus}; }).sort((a,b)=> b.pts-a.pts || b.exact-a.exact || a.name.localeCompare(b.name)); }
 function renderMe(){ const bar=$("#meBar");
-    if(!bar) return; // <-- DIESE SICHERHEITSZEILE GANZ OBEN EINFÜGEN!
+    if(!bar) return;
 
   if(!me){
     const picker=TAIL_ORDER.map(c=>`<button type="button" class="tailopt${c==="NEUTRAL"?" sel":""}" data-tail="${c}" title="${esc(TAIL_LABEL[c])}">${tailSVG(c,34)}</button>`).join("");
@@ -422,7 +472,17 @@ function renderMe(){ const bar=$("#meBar");
 }
 function allPicksHTML(matchId,rHome,rAway,finished){ const mt=tips.filter(t=>t.match_id===matchId); if(!mt.length) return '<div class="all-picks"><span style="font-size:12px;color:var(--mut)">No picks yet</span></div>'; const chips=mt.map(t=>{ const isMe=t.player===me; let cls="pick-chip"; if(finished&&rHome!=null){ const exact=+t.home_tip===+rHome&&+t.away_tip===+rAway; const good=!exact&&Math.sign(+t.home_tip-+t.away_tip)===Math.sign(+rHome-+rAway); if(exact) cls+=" exact"; else if(good) cls+=" good"; } if(isMe) cls+=" me"; return `<span class="${cls}">${esc(t.player)} ${t.home_tip}:${t.away_tip}</span>`; }).join(""); return `<div class="all-picks">${chips}</div>`; }
 function toggleReveal(id,btn){ const el=document.getElementById('rev-'+id); if(!el) return; const hidden=el.style.display==="none"; el.style.display=hidden?"block":"none"; btn.textContent=hidden?"👀 Hide picks":"👀 Show all picks"; }
-function matchCard(m){ const pick=myPick(m.id)||{}; const closed=isClosed(m); const cd=getCountdownHtml(m); const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`; if(m.finished){ const s=scoreOf(pick,m),has=pick.home_tip!=null; return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`; } const dis=closed?"disabled":""; const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:""; return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span></div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>${statusBanner(m)}${revealSection}</div>`; }
+function matchCard(m){
+  const pick=myPick(m.id)||{}; const closed=isClosed(m); const cd=getCountdownHtml(m);
+  const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`;
+  if(m.finished){
+    const s=scoreOf(pick,m),has=pick.home_tip!=null;
+    return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`;
+  }
+  const dis=closed?"disabled":"";
+  const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:"";
+  return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}${revealSection}</div>`;
+}
 function nextKickoff(){ const future=matches.filter(m=>m.kickoff && !m.finished).map(m=>({m,t:new Date(m.kickoff).getTime()})).filter(x=>!isNaN(x.t)&&x.t>Date.now()).sort((a,b)=>a.t-b.t); if(!future.length) return null; return future[0]; }
 function fmtCountdown(ms){ if(ms<0) ms=0; const totalMin=Math.floor(ms/60000); const d=Math.floor(totalMin/1440); const h=Math.floor((totalMin%1440)/60); const mi=totalMin%60; if(d>0) return `${d}d ${h}h`; if(h>0) return `${h}h ${String(mi).padStart(2,"0")}m`; return `${mi}m`; }
 function countdownLine(){ const nk=nextKickoff(); if(!nk) return ""; const diff=nk.t-Date.now(); const h=Math.floor(diff/3600000); const mm=Math.floor((diff%3600000)/60000); const hh=String(h).padStart(2,"0"); const mi=String(mm).padStart(2,"0"); return `<div class="livebar"><span class="livechip"><span class="dot"></span>Nächster Abflug in ${hh}:${mi} h</span></div>`; }
@@ -432,14 +492,9 @@ function openConsensusRows(){ const res=[]; matches.filter(m=>m.finished).forEac
 function renderTip(){ 
   if(!matches.length) return `<div class="empty">No matches yet. Add them in the <b>Control Tower</b> tab.</div>`; 
 
-  // --- HIER: Code für das Profil-Panel einfügen ---
   const meBarHTML = `<div id="meBar" class="me"></div>`;
-  // ----------------------------------------------------
 
   if(!me) return meBarHTML + `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
-
-  
-  // ----------------------------------------------------
 
   const groupMatches=matches.filter(m=>m.phase==="Group");
   
@@ -448,7 +503,12 @@ function renderTip(){
   const hasRounds=rounds.length>0; 
   const koMatches=matches.filter(m=>m.phase!=="Group"); 
   if(koMatches.length) rounds.push("Knockout"); 
-  if(hasRounds&&!rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
+  if(hasRounds && tipRound!=="Table" && !rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
+  if(!_roundInit){
+    _roundInit=true;
+    const firstOpen=rounds.find(r=>{ const rm=r==="Knockout"?koMatches:matches.filter(m=>m.round===r); return rm.some(m=>!isClosed(m)); });
+    tipRound = firstOpen || rounds[0] || "Round 1";
+  }
 
   function roundDot(rnd){ 
     const rm=rnd==="Knockout"?koMatches:matches.filter(m=>m.round===rnd); 
@@ -461,15 +521,17 @@ function renderTip(){
   } 
   
   let nav=`<div class="round-nav" id="roundNav">`; 
+  nav+=`<button class="${tipRound==="Table"?"on":""}" data-rnd="Table">📊 Table</button>`;
   rounds.forEach(r=>{ 
     nav+=`<button class="${r===tipRound?"on":""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${roundDot(r)}"></span>${esc(r)}</button>`; 
   }); 
   nav+=`</div>`; 
 
+  if(tipRound==="Table") return meBarHTML + nav + renderGroupTable();
+
   const visible=tipRound==="Knockout"?koMatches:matches.filter(m=>m.round===tipRound); 
   const fallback=!hasRounds?matches:visible; 
 
-  // --- HIER IST DIE EINZIGE KORREKTUR ---
   const pickedInRound = fallback.filter(m => {const p = myPick(m.id); return p && p.home_tip != null;}).length;
   const totalInRound = fallback.length; 
 
@@ -477,7 +539,6 @@ function renderTip(){
   if(totalInRound > 0) {
     chips.push(`<span class="livechip">📝 ${pickedInRound}/${totalInRound} picks this round</span>`); 
   }
-  // --- ENDE DER KORREKTUR ---
 
   const statusBar=chips.length?`<div class="livebar">${chips.join("")}</div>`:""; 
   const days=[]; 
@@ -489,12 +550,19 @@ function renderTip(){
   
   let html=""; 
   days.forEach(d=>{ 
-    html+=`<div class="day">${esc(d.date)}</div>`; 
-    d.ms.forEach(m=>{html+=matchCard(m);}); 
-    if(d.ms.some(m=>!isClosed(m))) {
-      html+=`<button class="btn js-savetips" style="width:100%;padding:13px;margin:4px 0 18px">Save predictions</button>`; 
+    const dayDone = d.ms.length>0 && d.ms.every(m=>m.finished);
+    if(dayDone){
+      html+=`<details class="day-fold"><summary>✅ ${esc(d.date)}<span class="day-cnt">${d.ms.length} ${d.ms.length===1?"game":"games"} · done</span></summary><div class="day-fold-body">`;
+      d.ms.forEach(m=>{html+=matchCard(m);});
+      html+=`</div></details>`;
+    } else {
+      html+=`<div class="day">${esc(d.date)}</div>`; 
+      d.ms.forEach(m=>{html+=matchCard(m);}); 
+      if(d.ms.some(m=>!isClosed(m))) {
+        html+=`<button class="btn js-savetips" style="width:100%;padding:13px;margin:4px 0 18px">Save predictions</button>`; 
+      }
     }
-  }); 
+  });
   
   return meBarHTML + (hasRounds ? nav : "") + renderOpsLine() + statusBar + html; 
 }
@@ -514,21 +582,116 @@ function renderBonus(){
 }
 async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
-function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td> <td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td> </tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
-function renderAirlineStandings(){
+function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function groupStandings(grp){
+  const teams={};
+  const ensure=t=>{ if(!teams[t]) teams[t]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,Pts:0}; return teams[t]; };
+  matches.filter(m=>m.phase==="Group"&&(m.grp||"")===grp).forEach(m=>{
+    ensure(m.home); ensure(m.away);
+    if(!m.finished||m.home_score==null||m.away_score==null) return;
+    const h=teams[m.home], a=teams[m.away], hs=+m.home_score, as=+m.away_score;
+    h.P++; a.P++; h.GF+=hs; h.GA+=as; a.GF+=as; a.GA+=hs;
+    if(hs>as){ h.W++; a.L++; h.Pts+=3; }
+    else if(hs<as){ a.W++; h.L++; a.Pts+=3; }
+    else { h.D++; a.D++; h.Pts++; a.Pts++; }
+  });
+  return Object.values(teams).map(t=>({...t,GD:t.GF-t.GA}))
+    .sort((x,y)=> y.Pts-x.Pts || y.GD-x.GD || y.GF-x.GF || x.team.localeCompare(y.team));
+}
+function groupResultsHTML(grp){
+  const ms=matches.filter(m=>m.phase==="Group"&&(m.grp||"")===grp).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  if(!ms.length) return "";
+  const rows=ms.map(m=>{
+    const mid=m.finished&&m.home_score!=null ? `<b class="num">${m.home_score} : ${m.away_score}</b>` : `${esc(m.match_date)}<br>${esc(m.match_time)}`;
+    return `<div class="gres"><div class="gres-t h"><span class="tname">${esc(m.home)}</span>${flagHTML(m.home)}</div><div class="gres-s">${mid}</div><div class="gres-t">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span></div></div>`;
+  }).join("");
+  return `<div class="gres-wrap"><div class="day" style="margin:14px 4px 6px">Results · Group ${esc(grp)}</div>${rows}</div>`;
+}
+function renderGroupTable(){
+  const grps=[...new Set(matches.filter(m=>m.phase==="Group").map(m=>m.grp).filter(Boolean))].sort();
+  if(!grps.length) return `<div class="empty">No group matches yet.</div>`;
+  if(!grps.includes(tableGroup)) tableGroup=grps[0];
+  let nav=`<div class="round-nav" style="margin-bottom:12px">`;
+  grps.forEach(g=>{ nav+=`<button class="${g===tableGroup?"on":""}" data-grp="${esc(g)}">Group ${esc(g)}</button>`; });
+  nav+=`</div>`;
+  const rows=groupStandings(tableGroup).map((t,i)=>`<tr class="${i<2?"qual":""}"><td class="gt-pos">${i+1}</td><td class="gt-team">${flagHTML(t.team)}<span>${esc(t.team)}</span></td><td>${t.P}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GD>0?"+":""}${t.GD}</td><td class="gt-pts">${t.Pts}</td></tr>`).join("");
+  const table=`<table class="gtable"><thead><tr><th></th><th style="text-align:left">Team</th><th title="Played">P</th><th title="Won">W</th><th title="Drawn">D</th><th title="Lost">L</th><th title="Goal difference">GD</th><th title="Points">Pts</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return nav + table + groupResultsHTML(tableGroup);
+}
+function renderAirlineStandings() {
   const t = totals();
-  if(!t.length) return "";
+  if (!t.length) return "";
+
   const byTail = {};
-  t.forEach(p=>{
+  t.forEach(p => {
     const code = tailOf(p.name);
-    if(!byTail[code]) byTail[code] = {code, players:0, pts:0, exact:0, bonus:0};
+    if (!byTail[code]) byTail[code] = { code: code, players: 0, pts: 0, exact: 0, bonus: 0 };
     const a = byTail[code];
     a.players++; a.pts += p.pts; a.exact += p.exact; a.bonus += p.bonus;
   });
-  const rows = Object.values(byTail).sort((x,y)=> y.pts-x.pts || y.exact-x.exact || y.players-x.players || x.code.localeCompare(y.code));
-  if(!rows.length) return "";
-  const trs = rows.map((a,i)=>`<tr><td class="rank ${i<3?("p"+(i+1)):""}">${i+1}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(a.code,24)}<span>${esc(TAIL_LABEL[a.code]||a.code)} <span style="color:var(--mut);font-weight:600;font-size:13px">· ${a.players}</span></span></span></td><td class="stat num">${a.exact}</td><td class="stat num">${a.pts - a.bonus}</td><td class="stat num">${a.bonus}</td><td class="total num">${a.pts}</td></tr>`).join("");
-  return `<h3 style="font-family:'Anton',sans-serif;font-size:17px;letter-spacing:.3px;margin:4px 4px 4px">✈️ Airline Cup</h3><div style="color:var(--mut);font-size:13px;margin:0 4px 10px;line-height:1.5">Jede Airline sammelt die Punkte ihrer Crew — welche Flotte fliegt am höchsten?</div><table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Airline · Crew</th><th class="stat-h">Hits</th><th class="stat-h">Points</th><th class="stat-h">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${trs}</tbody></table>`;
+
+  const allAirlines = Object.values(byTail);
+  if (!allAirlines.length) return "";
+
+  // 1. Berechne die zwei Awards
+  const biggestFleet = allAirlines.reduce((best, current) => (current.pts > best.pts ? current : best));
+  
+  const sharpestCrew = allAirlines
+    .filter(a => a.players >= 3) // Mindestens 3 Spieler für diesen Award
+    .map(a => ({ ...a, avg: a.pts / a.players }))
+    .reduce((best, current) => (current.avg > best.avg ? current : best), { avg: 0 });
+
+  // 2. Sortiere die Tabelle nach Total
+  const sortedRows = allAirlines.sort((x, y) => y.pts - x.pts || y.exact - x.exact || x.code.localeCompare(y.code));
+
+  // 3. Erzeuge die Tabellenzeilen mit der "Avg"-Darstellung
+  const trs = sortedRows.map((a, i) => {
+    const avg = a.players > 0 ? (a.pts / a.players).toFixed(1) : "0.0";
+    const totalCell = `
+      <td class="total num">
+        ${a.pts}
+        <div style="font-size:11px; font-style:italic; font-weight:500; color:var(--mut); margin-top:1px;">⌀ ${avg}</div>
+      </td>
+    `;
+    return `<tr>
+        <td class="rank ${i < 3 ? ("p" + (i + 1)) : ""}">${i + 1}</td>
+        <td class="player">
+          <span style="display:inline-flex;align-items:center;gap:7px">
+            ${tailHTML(a.code, 24)}
+            <span>
+              ${esc(TAIL_LABEL[a.code] || a.code)} 
+              <span style="color:var(--mut);font-weight:600;font-size:13px">· ${a.players}</span>
+            </span>
+          </span>
+        </td>
+        <td class="stat num">${a.exact}</td>
+        <td class="stat num">${a.pts - a.bonus}</td>
+        <td class="stat num">${a.bonus}</td>
+        ${totalCell}
+      </tr>`;
+  }).join("");
+
+  // 4. Award-Karten + gesamte HTML-Struktur
+  let awardsHTML = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">`;
+
+  const bigOk = biggestFleet.pts > 0;
+  awardsHTML += `<div class="prize" style="margin:0;"><div class="pmedal">🏆</div><div class="pinfo"><div class="pplace">Biggest Fleet</div><div class="pwin" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${bigOk ? tailHTML(biggestFleet.code, 22) : ""}<span>${bigOk ? `${esc(TAIL_LABEL[biggestFleet.code])} · ${biggestFleet.pts} pts` : "—"}</span></div></div></div>`;
+
+  const sharpOk = sharpestCrew.avg > 0;
+  awardsHTML += `<div class="prize" style="margin:0;"><div class="pmedal">🎯</div><div class="pinfo"><div class="pplace">Sharpest Crew</div><div class="pwin" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${sharpOk ? tailHTML(sharpestCrew.code, 22) : ""}<span>${sharpOk ? `${esc(TAIL_LABEL[sharpestCrew.code])} · ⌀ ${sharpestCrew.avg.toFixed(1)}` : "—"}</span></div></div></div>`;
+
+  awardsHTML += `</div>`;
+
+  return `
+    <h3 style="font-family:'Anton',sans-serif;font-size:17px;letter-spacing:.3px;margin:16px 4px 4px">✈️ Airline Cup</h3>
+    <div style="color:var(--mut);font-size:13px;margin:0 4px 10px;line-height:1.5">Each airline's crew points are pooled together. Which fleet will fly highest?</div>
+    ${awardsHTML}
+    <table class="rank-table">
+      <colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup>
+      <thead><tr><th class="rank-h">#</th><th class="player-h">Airline · Crew</th><th class="stat-h">Hits</th><th class="stat-h">Points</th><th class="stat-h">Bonus</th><th class="total-h">Total / Avg</th></tr></thead>
+      <tbody>${trs}</tbody>
+    </table>
+  `;
 }
 
 function renderCrew(){
@@ -656,35 +819,33 @@ function renderView(){
   const view=$("#view");
   const tabMap={tip:renderTip,bonus:renderBonus,rank:renderRank,crew:renderCrew,prizes:renderPrizes,rules:renderRules,admin:renderAdmin};
   view.innerHTML=tabMap[tab]();
-  renderMe(); // <-- DIESE ZEILE HIER EINFÜGEN!
+  renderMe();
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
-  tab = b.dataset.tab;
-  window.location.hash = tab; // <-- DIESE ZEILE HINZUFÜGEN (ändert die URL auf #tab-name)
-  renderView();
-});
+  document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+    tab = b.dataset.tab;
+    window.location.hash = tab;
+    renderView();
+  });
 
   // Departures: save + round switcher
   const saveTipsBtn=document.getElementById("saveTips");
   if(saveTipsBtn) saveTipsBtn.onclick=saveTips;
   document.querySelectorAll(".js-savetips").forEach(b=>b.onclick=saveTips);
   document.querySelectorAll("[data-rnd]").forEach(btn=>btn.onclick=()=>{tipRound=btn.dataset.rnd;renderView();});
+  document.querySelectorAll("[data-grp]").forEach(btn=>btn.onclick=()=>{tableGroup=btn.dataset.grp;renderView();});
 
   // Upgrades: save
   const saveBonusBtn=document.getElementById("saveBonus");
   if(saveBonusBtn) saveBonusBtn.onclick=saveBonus;
 
   // Control Tower: login
-// ... Innerhalb von renderView() ...
-if(tab==="admin"&&!adminOK){
-  const b=document.getElementById("alogin");
-  if(b){
-    b.onclick=()=>{ if(btoa(document.getElementById("apw").value)===ADMIN_PW){adminOK=true;renderView();} else toast("Wrong password"); };
-    document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
+  if(tab==="admin"&&!adminOK){
+    const b=document.getElementById("alogin");
+    if(b){
+      b.onclick=()=>{ if(btoa(document.getElementById("apw").value)===ADMIN_PW){adminOK=true;renderView();} else toast("Wrong password"); };
+      document.getElementById("apw").onkeydown=e=>{ if(e.key==="Enter") b.click(); };
+    }
   }
-}
-
-
 
   // Control Tower: admin actions
   if(tab==="admin"&&adminOK){
@@ -786,10 +947,7 @@ async function sendCabinLog() {
     toast("Please enter a message.");
     return;
   }
-  
-  // Sendet den Text an deine neue Supabase-Tabelle "feedback"
   const { error } = await sb.from("feedback").insert([{ message: txt }]);
-  
   if (error) {
     toast("Could not submit log entry. Sorry!");
   } else {
@@ -797,6 +955,7 @@ async function sendCabinLog() {
     document.getElementById("cabinLogModal").style.display = "none";
   }
 }
+
 // Reagiert auf Zurück/Vorwärts im Browser
 window.addEventListener("hashchange", () => {
   const h = window.location.hash.replace("#", "");
@@ -806,8 +965,7 @@ window.addEventListener("hashchange", () => {
   }
 });
 
-loadAll(); // <-- Diese Zeile ist schon da
-
+loadAll();
 setInterval(tickCountdowns, 30000);
 </script>
 
