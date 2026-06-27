@@ -228,6 +228,12 @@
   .day-fold[open]>summary{border-bottom:1px solid var(--line)}
   .day-cnt{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:.2px;color:var(--mut)}
   .day-fold-body{padding:12px 12px 2px}
+  /* --- Form guide dots (Flight Deck) --- */
+  .fguide{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+  .fdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .fdot-hit{background:#22c55e}
+  .fdot-miss{background:#e5e7eb}
+  .fdot-none{background:transparent;border:1.5px dashed #d1d5db}
   /* --- Group standings table --- */
   .gtable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
   .gtable th,.gtable td{padding:9px 4px;border-bottom:1px solid var(--line);text-align:center;font-size:13px}
@@ -414,7 +420,7 @@ const urlHash = window.location.hash.replace("#", "");
 let tab = validTabs.includes(urlHash) ? urlHash : "tip";
 // ----------------------------------------
 
-let adminOK=false,tipRound="Round 1",_lastRank1=null,tableGroup="A",_roundInit=false;
+let adminOK=false,tipRound="Round 1",_lastRank1=null,tableGroup="A",_roundInit=false,adminEditId=null;
 
 let opsNewsMode="auto",opsNewsPreset="",opsNewsCustom="";
 const OPS_PRESETS=["Boarding call: predictions for the day are open.","Final boarding reminder: predictions close 5 minutes before kickoff.","Flight Deck update: every scored match can reshuffle the leaderboard.","Prize cargo check: SWISS Schoki is waiting for the top 3.","Control Tower note: one sharp prediction can change everything."];
@@ -497,21 +503,25 @@ function renderTip(){
   if(!me) return meBarHTML + `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to start predicting.</div>`;
 
   const groupMatches=matches.filter(m=>m.phase==="Group");
-  
-  const rounds=[...new Set(groupMatches.map(m=>m.round).filter(Boolean))].sort(); 
 
-  const hasRounds=rounds.length>0; 
-  const koMatches=matches.filter(m=>m.phase!=="Group"); 
-  if(koMatches.length) rounds.push("Knockout"); 
+  const groupRounds=[...new Set(groupMatches.map(m=>m.round).filter(Boolean))].sort();
+  const KO_ORDER=["Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
+  const KO_LABEL={"Round of 32":"R32","Round of 16":"R16","Quarter-final":"QF","Semi-final":"SF","Third place":"3rd","Final":"Final"};
+  const koRounds=KO_ORDER.filter(ph=>matches.some(m=>m.phase===ph));
+  const rounds=[...groupRounds,...koRounds];
+
+  const hasRounds=rounds.length>0;
+  const inGroup=r=>groupRounds.includes(r);
+  const roundMatches=r=> inGroup(r)?matches.filter(m=>m.round===r):matches.filter(m=>m.phase===r);
   if(hasRounds && tipRound!=="Table" && !rounds.includes(tipRound)) tipRound=rounds[0]||"Round 1"; 
   if(!_roundInit){
     _roundInit=true;
-    const firstOpen=rounds.find(r=>{ const rm=r==="Knockout"?koMatches:matches.filter(m=>m.round===r); return rm.some(m=>!isClosed(m)); });
+    const firstOpen=rounds.find(r=>roundMatches(r).some(m=>!isClosed(m)));
     tipRound = firstOpen || rounds[0] || "Round 1";
   }
 
   function roundDot(rnd){ 
-    const rm=rnd==="Knockout"?koMatches:matches.filter(m=>m.round===rnd); 
+    const rm=roundMatches(rnd); 
     const open=rm.filter(m=>!isClosed(m)); 
     const picked=open.filter(m=>{const p=myPick(m.id);return p&&p.home_tip!=null;}); 
     if(open.length===0) return "#aab2ad"; 
@@ -523,13 +533,13 @@ function renderTip(){
   let nav=`<div class="round-nav" id="roundNav">`; 
   nav+=`<button class="${tipRound==="Table"?"on":""}" data-rnd="Table">📊 Table</button>`;
   rounds.forEach(r=>{ 
-    nav+=`<button class="${r===tipRound?"on":""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${roundDot(r)}"></span>${esc(r)}</button>`; 
+    nav+=`<button class="${r===tipRound?"on":""}" data-rnd="${esc(r)}"><span class="rdot" style="background:${roundDot(r)}"></span>${esc(KO_LABEL[r]||r)}</button>`; 
   }); 
   nav+=`</div>`; 
 
   if(tipRound==="Table") return meBarHTML + nav + renderGroupTable();
 
-  const visible=tipRound==="Knockout"?koMatches:matches.filter(m=>m.round===tipRound); 
+  const visible=roundMatches(tipRound); 
   const fallback=!hasRounds?matches:visible; 
 
   const pickedInRound = fallback.filter(m => {const p = myPick(m.id); return p && p.home_tip != null;}).length;
@@ -538,6 +548,14 @@ function renderTip(){
   const chips=[]; 
   if(totalInRound > 0) {
     chips.push(`<span class="livechip">📝 ${pickedInRound}/${totalInRound} picks this round</span>`); 
+  }
+  const todayOpen=todaysMatches().filter(m=>!isClosed(m));
+  if(todayOpen.length>0){
+    const allP=[...new Set([...tips.map(t=>t.player),...bonusAnswers.map(a=>a.player)])];
+    if(allP.length>0){
+      const missing=allP.filter(name=>todayOpen.some(m=>{const p=tips.find(x=>x.player===name&&x.match_id===m.id);return !p||p.home_tip==null;})).length;
+      if(missing>0) chips.push(`<span class="livechip">⚠️ ${missing} crew without tips today</span>`);
+    }
   }
 
   const statusBar=chips.length?`<div class="livebar">${chips.join("")}</div>`:""; 
@@ -570,19 +588,37 @@ function renderTip(){
 async function saveTips(){ const rows=[]; let missing=false; let invalid=false; [...document.querySelectorAll(".match[data-m]")].forEach(c=>{ const id=+c.dataset.m; const m=matches.find(x=>x.id===id); if(!m||isClosed(m)) return; const hEl=c.querySelector('[data-side="h"]'); const aEl=c.querySelector('[data-side="a"]'); const hRaw=hEl?hEl.value.trim():""; const aRaw=aEl?aEl.value.trim():""; if(hRaw===""&&aRaw==="") return; if(hRaw===""||aRaw===""){ missing=true; return; } const h=Number(hRaw); const a=Number(aRaw); if(!Number.isFinite(h)||!Number.isFinite(a)||h<0||a<0){ invalid=true; return; } rows.push({ player: me, match_id: id, home_tip: Math.round(h), away_tip: Math.round(a) }); }); if(missing){ toast("Please enter both home and away goals."); return; } if(invalid){ toast("Goals must be 0 or higher."); return; } if(!rows.length){ toast("Nothing to save yet."); return; } const { error } = await sb.from("tips").upsert(rows, { onConflict: "player,match_id" }); if(error){ toast("Save failed."); return; } await loadAll(); toast("Predictions saved."); }
 function firstKickoff(){ const ks=matches.map(m=>m.kickoff?new Date(m.kickoff).getTime():NaN).filter(t=>!isNaN(t)); return ks.length?Math.min(...ks):null; }
 function bonusLocked(){ const f=firstKickoff(); return f!=null && Date.now()>=f; }
-function bonusCard(q){ const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===me); const myVal=a?a.answer:""; const closed=q.locked||bonusLocked(); const meta=`<div class="meta"><span>${q.points} pts ${q.qtype==="number"?"· closest wins":""}</span><span>${q.resolved?"✅ resolved":(closed?"🔒 closed":"open")}</span></div>`; let control=""; if(q.resolved||closed){ control=`<input type="text" value="${esc(myVal||"—")}" disabled>`; }else if(q.qtype==="choice"){ const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})(); control=`<select data-q="${q.id}"><option value="">Choose…</option>${opts.map(o=>`<option ${myVal===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`; }else if(q.qtype==="number"){ control=`<input type="number" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your number">`; }else{ control=`<input type="text" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your answer">`; } let footer=""; if(q.resolved){ const e=bonusEarned(q,me); footer=`<div class="correct"><span>Correct: <b>${esc(q.correct)}</b></span>${a?`<span class="pill ${e?"":"zero"}">${e||0} pts</span>`:`<span class="locked">no answer</span>`}</div>`; } return `<div class="bonus">${meta}<div class="q">${esc(q.question)}</div>${control}${footer}</div>`; }
+function bonusCard(q){ const a=bonusAnswers.find(x=>x.question_id===q.id&&x.player===me); const myVal=a?a.answer:""; const closed=qClosed(q); const live=isLiveBonus(q); const meta=`<div class="meta"><span>${q.points} pts ${q.qtype==="number"?"· closest wins":""}${live?" · 🔴 live":""}</span><span>${q.resolved?"✅ resolved":(closed?"🔒 closed":"open")}</span></div>`; let control=""; if(q.resolved||closed){ control=`<input type="text" value="${esc(myVal||"—")}" disabled>`; }else if(q.qtype==="choice"){ const opts=(()=>{try{return JSON.parse(q.options||"[]")}catch(e){return[]}})(); control=`<select data-q="${q.id}"><option value="">Choose…</option>${opts.map(o=>`<option ${myVal===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`; }else if(q.qtype==="number"){ control=`<input type="number" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your number">`; }else{ control=`<input type="text" data-q="${q.id}" value="${esc(myVal)}" placeholder="Your answer">`; } let footer=""; if(q.resolved){ const e=bonusEarned(q,me); footer=`<div class="correct"><span>Correct: <b>${esc(q.correct)}</b></span>${a?`<span class="pill ${e?"":"zero"}">${e||0} pts</span>`:`<span class="locked">no answer</span>`}</div>`; } return `<div class="bonus">${meta}<div class="q">${esc(q.question)}</div>${control}${footer}</div>`; }
 function renderBonus(){
   const meBarHTML = `<div id="meBar" class="me"></div>`;
   if(!me) return meBarHTML + `<div class="hint" style="text-align:center;margin-top:20px">Enter your name above to play the bonus round.</div>`;
   if(!bonusQs.length) return `<div class="empty">No bonus questions yet.<br>Big-picture predictions for the whole tournament will appear here. 🎲</div>`;
-  let html=`<div class="opsline" style="margin-bottom:12px"><span class="label">${bonusLocked()?"✈ closed":"✈ important"}</span>${bonusLocked()?"These answers are now locked — the tournament has started.":"Answer all upgrades <b>before the first match</b> — they lock once it kicks off."}</div>`;
-  html+=bonusQs.map(bonusCard).join("");
-  if(!bonusLocked() && bonusQs.some(q=>!q.resolved&&!q.locked)) html+=`<button class="btn gold" id="saveBonus" style="width:100%;padding:14px;margin-top:8px;color:#1a1a1a">Save bonus answers</button>`;
+  const preQs=bonusQs.filter(q=>!isLiveBonus(q));
+  const liveQs=bonusQs.filter(q=>isLiveBonus(q));
+  let html="";
+  if(preQs.length){
+    html+=`<div class="opsline" style="margin-bottom:12px"><span class="label">${bonusLocked()?"✈ closed":"✈ important"}</span>${bonusLocked()?"Pre-tournament answers are now locked.":"Answer all upgrades <b>before the first match</b> — they lock once it kicks off."}</div>`;
+    html+=preQs.map(bonusCard).join("");
+  }
+  if(liveQs.length){
+    html+=`<div class="opsline" style="margin-bottom:12px"><span class="label">🔴 live</span>New bonus questions — answer before they get locked!</div>`;
+    html+=liveQs.map(bonusCard).join("");
+  }
+  const anyOpen=bonusQs.some(q=>!q.resolved&&!qClosed(q));
+  if(anyOpen) html+=`<button class="btn gold" id="saveBonus" style="width:100%;padding:14px;margin-top:8px;color:#1a1a1a">Save bonus answers</button>`;
   return html;
 }
-async function saveBonus(){ if(bonusLocked()){toast("Bonus is closed — the tournament has started");return;} const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
+async function saveBonus(){ const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const q=bonusQs.find(x=>x.id===id); if(q&&qClosed(q)) return; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
-function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
+function formGuide(name){
+  const fin=matches.filter(m=>m.finished).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  const last5=fin.slice(-5); if(!last5.length) return "";
+  const dots=last5.map(m=>{ const t=tips.find(x=>x.player===name&&x.match_id===m.id); const s=scoreOf(t,m); if(s==null) return `<span class="fdot fdot-none"></span>`; return s>0?`<span class="fdot fdot-hit" title="${s}pts"></span>`:`<span class="fdot fdot-miss"></span>`; }).join("");
+  return `<span class="fguide">${dots}</span>`;
+}
+function isLiveBonus(q){ const fk=firstKickoff(); if(!fk||!q.created_at) return false; return new Date(q.created_at).getTime()>fk; }
+function qClosed(q){ return q.locked||(bonusLocked()&&!isLiveBonus(q)); }
+function renderRank(){ const t = totals(); if(!t.length){ return `<div class="empty">No predictions yet.<br>Be the first — the Flight Deck is waiting.</div>`; } const anyScored = matches.some(m=>m.finished) || bonusQs.some(q=>q.resolved); let podium = ""; if(t.length >= 3){ const p = t.slice(0,3); const order = [p[1], p[0], p[2]].filter(Boolean); const cls = ["second","first","third"]; const med = ["🥈","🥇","🥉"]; podium = `<div class="podium">${order.map((pl,i)=>`<div class="pod ${cls[i]}"><div class="medal">${med[i]}</div><div class="pname">${tailHTML(tailOf(pl.name),26)} ${esc(pl.name)}</div><div class="ppts num">${pl.pts} pts</div></div>`).join("")}</div>`; } const rows = t.map((p,i)=>{ const r = i + 1; const rankCls = r <= 3 ? `p${r}` : ""; return `<tr class="${p.name===me ? "me-row" : ""}"><td class="rank ${rankCls}">${r}</td><td class="player"><span style="display:inline-flex;align-items:center;gap:7px">${tailHTML(tailOf(p.name),24)}<span>${esc(p.name)}${p.name===me ? `<span class="you-tag">(you)</span>` : ``}${formGuide(p.name)}</span></span></td><td class="stat num">${p.exact}</td><td class="stat num">${p.pts - p.bonus}</td><td class="stat num">${p.bonus}</td><td class="total num">${p.pts}</td></tr>`; }).join(""); if(me && t.length && t[0].name === me){ if(_lastRank1 !== me){ _lastRank1 = me; setTimeout(fireConfetti, 200); } } else { _lastRank1 = null; } return `${podium}${!anyScored ? `<div class="hint">The Flight Deck fills up once matches are scored or bonus questions are resolved.</div>` : ``}<table class="rank-table"><colgroup><col class="col-rank"><col class="col-player"><col class="col-hit"><col class="col-points"><col class="col-bonus"><col class="col-total"></colgroup><thead><tr><th class="rank-h">#</th><th class="player-h">Player</th><th class="stat-h" title="Exact-score hits — info only">Hits</th><th class="stat-h" title="Points from match predictions">Points</th><th class="stat-h" title="Bonus question points">Bonus</th><th class="total-h">Total</th></tr></thead><tbody>${rows}</tbody></table>`; }
 function groupStandings(grp){
   const teams={};
   const ensure=t=>{ if(!teams[t]) teams[t]={team:t,P:0,W:0,D:0,L:0,GF:0,GA:0,Pts:0}; return teams[t]; };
@@ -760,12 +796,30 @@ function renderPrizes(){
 function renderAdmin(){
   if(!adminOK) return `<div class="panel"><h3>Control Tower</h3><div class="field"><label>Access code</label><input id="apw" type="password" placeholder="Tower password"></div><button class="btn" id="alogin">Enter tower</button></div>`;
   const phases=["Group","Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
-  const mlist=matches.map(m=>`<div class="adminmatch" data-am="${m.id}">
+  const mlist=matches.map(m=>{
+    if(adminEditId===m.id){
+      const kv=m.kickoff?(()=>{ try{ const d=new Date(m.kickoff); const pad=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }catch(e){ return ""; } })():"";
+      return `<div class="adminedit" data-am="${m.id}" style="background:#f4f7ff;border:1px solid #d7ddf5;border-radius:10px;padding:12px;margin:8px 0">
+        <div class="grid2">
+          <div class="field" style="margin:0"><label>Home</label><input type="text" data-ehome value="${esc(m.home)}"></div>
+          <div class="field" style="margin:0"><label>Away</label><input type="text" data-eaway value="${esc(m.away)}"></div>
+          <div class="field" style="margin:0"><label>Date (display)</label><input type="text" data-edate value="${esc(m.match_date||"")}"></div>
+          <div class="field" style="margin:0"><label>Time (display)</label><input type="text" data-etime value="${esc(m.match_time||"")}"></div>
+          <div class="field" style="margin:0;grid-column:1/-1"><label>Kickoff — local time (auto-lock 5 min before)</label><input type="datetime-local" data-ekick value="${kv}"></div>
+        </div>
+        <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+          <button class="btn ghost sm" data-ecancel="${m.id}">Cancel</button>
+          <button class="btn sm" data-esave="${m.id}">Save changes</button>
+        </div></div>`;
+    }
+    return `<div class="adminmatch" data-am="${m.id}">
       <span class="nm">${flagHTML(m.home)} ${esc(m.home)} – ${esc(m.away)} ${flagHTML(m.away)} <span style="color:var(--mut)">(${esc(m.match_date)})</span></span>
       <input type="number" min="0" data-side="hs" value="${m.home_score??""}" placeholder="–"><span style="color:var(--mut)">:</span><input type="number" min="0" data-side="as" value="${m.away_score??""}" placeholder="–">
+      <button class="btn ghost sm" data-edit="${m.id}" title="Edit teams / date">✎</button>
       <button class="btn sm ghost" data-lock="${m.id}">${m.locked?"🔒":"🔓"}</button>
       <button class="btn sm ${m.finished?"ghost":""}" data-fin="${m.id}">${m.finished?"scored ✓":"score"}</button>
-      <button class="btn ghost sm" data-del="${m.id}">✕</button></div>`).join("");
+      <button class="btn ghost sm" data-del="${m.id}">✕</button></div>`;
+  }).join("");
   const bqlist=bonusQs.map(q=>{
     let setter;
     if(q.qtype==="choice"){
@@ -881,6 +935,20 @@ function renderView(){
       if(!confirm("Delete match?"))return;
       await sb.from("matches").delete().eq("id",+btn.dataset.del);
       await loadAll();
+    });
+    document.querySelectorAll('[data-edit]').forEach(btn=>btn.onclick=()=>{ adminEditId=+btn.dataset.edit; renderView(); });
+    document.querySelectorAll('[data-ecancel]').forEach(btn=>btn.onclick=()=>{ adminEditId=null; renderView(); });
+    document.querySelectorAll('[data-esave]').forEach(btn=>btn.onclick=async()=>{
+      const id=+btn.dataset.esave, row=btn.closest('[data-am]');
+      const home=row.querySelector('[data-ehome]').value.trim();
+      const away=row.querySelector('[data-eaway]').value.trim();
+      if(!home||!away){toast("Home and away can't be empty");return;}
+      const upd={home,away,match_date:row.querySelector('[data-edate]').value.trim()||"TBD",match_time:row.querySelector('[data-etime]').value.trim()||"—"};
+      const kv=row.querySelector('[data-ekick]').value;
+      if(kv){ const d=new Date(kv); upd.kickoff=isNaN(d)?null:d.toISOString(); } else { upd.kickoff=null; }
+      const {error}=await sb.from("matches").update(upd).eq("id",id);
+      if(error){toast("Save failed");return;}
+      adminEditId=null; await loadAll(); toast("Match updated");
     });
     const ab=document.getElementById("addBonus");
     if(ab) ab.onclick=async()=>{
