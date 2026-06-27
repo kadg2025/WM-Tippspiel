@@ -228,6 +228,15 @@
   .day-fold[open]>summary{border-bottom:1px solid var(--line)}
   .day-cnt{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:.2px;color:var(--mut)}
   .day-fold-body{padding:12px 12px 2px}
+  /* --- Knockout banner + pool consensus --- */
+  .koline{background:linear-gradient(135deg,#fff5f5,#ffe9e9);border:1px solid #f5c2c2;border-radius:12px;padding:11px 14px;margin:0 0 12px;box-shadow:var(--shadow);font-size:13.5px;font-weight:700;color:#9b1c1c;line-height:1.45}
+  .koline .label{display:inline-block;margin-right:8px;font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#c0392b}
+  .consensus{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+  .cons-lbl{font-size:11px;font-weight:700;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+  .cons-bar{display:flex;height:9px;border-radius:6px;overflow:hidden;background:var(--bg)}
+  .cons-bar span{display:block;height:100%}
+  .cons-legend{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--mut);margin-top:5px;gap:6px}
+  .cons-legend span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* --- Form guide dots (Flight Deck) --- */
   .fguide{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
   .fdot{width:8px;height:8px;border-radius:50%;display:inline-block}
@@ -483,11 +492,11 @@ function matchCard(m){
   const head=`<div class="meta"><span class="grp">${m.phase==="Group"?("Group "+(m.grp||"")):esc(m.phase)}</span><span style="text-align:right;line-height:1.5">${cd}${cd?"<br>":""}<span style="opacity:.9">${esc(m.match_date)} · ${esc(m.match_time)}${closed&&!m.finished?" · 🛑 Gate closed":""}</span></span></div>`;
   if(m.finished){
     const s=scoreOf(pick,m),has=pick.home_tip!=null;
-    return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}</div>`;
+    return `<div class="match">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="result"><span class="lbl">Full time</span><span class="final num">${m.home_score}:${m.away_score}</span></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}<div class="pts"><span>Your pick: <b class="num">${has?pick.home_tip+":"+pick.away_tip:"—"}</b></span>${has?`<span class="pill ${s===0?"zero":""}">${s} pts</span>`:`<span class="locked">no pick</span>`}</div>${allPicksHTML(m.id,m.home_score,m.away_score,true)}${koConsensus(m)}</div>`;
   }
   const dis=closed?"disabled":"";
   const revealSection=closed?`<button class="reveal-toggle" onclick="toggleReveal(${m.id},this)">👀 Show all picks</button><div id="rev-${m.id}" style="display:none">${allPicksHTML(m.id,null,null,false)}</div>`:"";
-  return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}${revealSection}</div>`;
+  return `<div class="match" data-m="${m.id}">${head}<div class="teams"><div class="team">${flagHTML(m.home)}<span class="tname">${esc(m.home)}</span>${rankBadge(m.home)}</div><div class="score"><input type="number" min="0" max="99" class="num" data-side="h" value="${pick.home_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"><span class="sep">:</span><input type="number" min="0" max="99" class="num" data-side="a" value="${pick.away_tip??""}" ${dis} oninput="if(this.value!==''&&+this.value<0)this.value=0"></div><div class="team away">${flagHTML(m.away)}<span class="tname">${esc(m.away)}</span>${rankBadge(m.away)}</div></div>${statusBanner(m)}${revealSection}${koConsensus(m)}</div>`;
 }
 function nextKickoff(){ const future=matches.filter(m=>m.kickoff && !m.finished).map(m=>({m,t:new Date(m.kickoff).getTime()})).filter(x=>!isNaN(x.t)&&x.t>Date.now()).sort((a,b)=>a.t-b.t); if(!future.length) return null; return future[0]; }
 function fmtCountdown(ms){ if(ms<0) ms=0; const totalMin=Math.floor(ms/60000); const d=Math.floor(totalMin/1440); const h=Math.floor((totalMin%1440)/60); const mi=totalMin%60; if(d>0) return `${d}d ${h}h`; if(h>0) return `${h}h ${String(mi).padStart(2,"0")}m`; return `${mi}m`; }
@@ -582,7 +591,8 @@ function renderTip(){
     }
   });
   
-  return meBarHTML + (hasRounds ? nav : "") + renderOpsLine() + statusBar + html; 
+  const koBanner = !inGroup(tipRound) ? `<div class="koline"><span class="label">🔥 Knockout</span>Win or go home — every prediction now counts <b>double</b> (up to 16 pts for an exact score).</div>` : "";
+  return meBarHTML + (hasRounds ? nav : "") + koBanner + renderOpsLine() + statusBar + html; 
 }
 
 async function saveTips(){ const rows=[]; let missing=false; let invalid=false; [...document.querySelectorAll(".match[data-m]")].forEach(c=>{ const id=+c.dataset.m; const m=matches.find(x=>x.id===id); if(!m||isClosed(m)) return; const hEl=c.querySelector('[data-side="h"]'); const aEl=c.querySelector('[data-side="a"]'); const hRaw=hEl?hEl.value.trim():""; const aRaw=aEl?aEl.value.trim():""; if(hRaw===""&&aRaw==="") return; if(hRaw===""||aRaw===""){ missing=true; return; } const h=Number(hRaw); const a=Number(aRaw); if(!Number.isFinite(h)||!Number.isFinite(a)||h<0||a<0){ invalid=true; return; } rows.push({ player: me, match_id: id, home_tip: Math.round(h), away_tip: Math.round(a) }); }); if(missing){ toast("Please enter both home and away goals."); return; } if(invalid){ toast("Goals must be 0 or higher."); return; } if(!rows.length){ toast("Nothing to save yet."); return; } const { error } = await sb.from("tips").upsert(rows, { onConflict: "player,match_id" }); if(error){ toast("Save failed."); return; } await loadAll(); toast("Predictions saved."); }
@@ -610,6 +620,18 @@ function renderBonus(){
 }
 async function saveBonus(){ const rows=[]; document.querySelectorAll('[data-q]').forEach(el=>{ const id=+el.dataset.q; const q=bonusQs.find(x=>x.id===id); if(q&&qClosed(q)) return; const v=String(el.value).trim(); if(v!=="") rows.push({player:me,question_id:id,answer:v}); }); if(!rows.length){toast("Nothing to save yet");return;} const {error}=await sb.from("bonus_answers").upsert(rows,{onConflict:"player,question_id"}); if(error){toast("Save failed");return;} await loadAll();toast("Bonus answers saved ✓"); }
 function fireConfetti(){ if(typeof confetti==="undefined") return; confetti({particleCount:120,spread:80,origin:{y:0.6},colors:["#f4b400","#19194B","#ffffff","#2d52c8"]}); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:60}),300); setTimeout(()=>confetti({particleCount:60,spread:120,origin:{y:0.5},angle:120}),500); }
+function koConsensus(m){
+  if(m.phase==="Group") return "";
+  const mine=myPick(m.id);
+  const show = m.finished || isClosed(m) || (mine && mine.home_tip!=null);
+  if(!show) return "";
+  const rows=tips.filter(t=>t.match_id===m.id && t.home_tip!=null);
+  const n=rows.length; if(!n) return "";
+  let hw=0,dr=0,aw=0;
+  rows.forEach(t=>{ const d=(+t.home_tip)-(+t.away_tip); if(d>0)hw++; else if(d<0)aw++; else dr++; });
+  const pct=x=>Math.round(x/n*100);
+  return `<div class="consensus"><div class="cons-lbl">🏁 Pool battle · ${n} pick${n===1?"":"s"}</div><div class="cons-bar"><span style="width:${pct(hw)}%;background:#2d52c8"></span><span style="width:${pct(dr)}%;background:#aab2ad"></span><span style="width:${pct(aw)}%;background:#19194B"></span></div><div class="cons-legend"><span style="color:#2d52c8">${esc(m.home)} ${pct(hw)}%</span><span>Draw ${pct(dr)}%</span><span style="color:#19194B">${esc(m.away)} ${pct(aw)}%</span></div></div>`;
+}
 function formGuide(name){
   const fin=matches.filter(m=>m.finished).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
   const last5=fin.slice(-5); if(!last5.length) return "";
