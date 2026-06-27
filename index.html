@@ -796,7 +796,7 @@ function renderPrizes(){
 function renderAdmin(){
   if(!adminOK) return `<div class="panel"><h3>Control Tower</h3><div class="field"><label>Access code</label><input id="apw" type="password" placeholder="Tower password"></div><button class="btn" id="alogin">Enter tower</button></div>`;
   const phases=["Group","Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
-  const mlist=matches.map(m=>{
+  const adminRow=(m)=>{
     if(adminEditId===m.id){
       const kv=m.kickoff?(()=>{ try{ const d=new Date(m.kickoff); const pad=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }catch(e){ return ""; } })():"";
       return `<div class="adminedit" data-am="${m.id}" style="background:#f4f7ff;border:1px solid #d7ddf5;border-radius:10px;padding:12px;margin:8px 0">
@@ -819,7 +819,21 @@ function renderAdmin(){
       <button class="btn sm ghost" data-lock="${m.id}">${m.locked?"🔒":"🔓"}</button>
       <button class="btn sm ${m.finished?"ghost":""}" data-fin="${m.id}">${m.finished?"scored ✓":"score"}</button>
       <button class="btn ghost sm" data-del="${m.id}">✕</button></div>`;
-  }).join("");
+  };
+  const adminKoOrder=["Round of 32","Round of 16","Quarter-final","Semi-final","Third place","Final"];
+  const adminGrpRounds=[...new Set(matches.filter(m=>m.phase==="Group").map(m=>m.round).filter(Boolean))].sort();
+  const adminSections=[
+    ...adminGrpRounds.map(r=>({label:r,list:matches.filter(m=>m.phase==="Group"&&m.round===r)})),
+    ...adminKoOrder.filter(ph=>matches.some(m=>m.phase===ph)).map(ph=>({label:ph,list:matches.filter(m=>m.phase===ph)}))
+  ];
+  const adminUngrouped=matches.filter(m=>m.phase==="Group"&&!m.round);
+  let mlist="";
+  adminSections.forEach(sec=>{
+    if(!sec.list.length) return;
+    const done=sec.list.every(m=>m.finished);
+    mlist+=`<details class="day-fold"${done?"":" open"}><summary>${esc(sec.label)}<span class="day-cnt">${sec.list.length}${done?" · done":""}</span></summary><div class="day-fold-body">${sec.list.map(adminRow).join("")}</div></details>`;
+  });
+  if(adminUngrouped.length) mlist+=`<div class="day-fold-body">${adminUngrouped.map(adminRow).join("")}</div>`;
   const bqlist=bonusQs.map(q=>{
     let setter;
     if(q.qtype==="choice"){
